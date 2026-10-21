@@ -11,10 +11,14 @@ namespace Hryvinskyi\ActivityLog\Model\Sanitizer;
 
 use Hryvinskyi\ActivityLog\Api\ConfigInterface;
 use Hryvinskyi\ActivityLog\Api\SanitizerInterface;
+use Hryvinskyi\ActivityLog\Model\Sanitizer\Body\BodyMaskerInterface;
 use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 
 /**
- * Masks values under secret field names, in arrays and in JSON text, to any depth
+ * Masks values under secret field names, in arrays and in JSON text, to any depth, and secrets in message bodies
+ *
+ * The secret names are the configured list plus a floor of names configuration cannot remove. Names on both sides
+ * are compared normalised: lower case, hyphens and spaces read as underscores.
  */
 class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
 {
@@ -26,11 +30,30 @@ class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
     private ?array $secretFields = null;
 
     /**
+     * @var list<BodyMaskerInterface>
+     */
+    private readonly array $bodyMaskers;
+
+    /**
      * @param ConfigInterface $config
+     * @param array<string> $mandatorySecretFields Names that are secret whatever the configuration says
+     * @param array<mixed> $bodyMaskers A BodyMaskerInterface per body format, asked in this order
      */
     public function __construct(
-        private readonly ConfigInterface $config
+        private readonly ConfigInterface $config,
+        private readonly array $mandatorySecretFields = [],
+        array $bodyMaskers = []
     ) {
+        $maskers = [];
+        foreach ($bodyMaskers as $code => $masker) {
+            if (!$masker instanceof BodyMaskerInterface) {
+                throw new \InvalidArgumentException(
+                    sprintf('Body masker "%s" must implement %s.', $code, BodyMaskerInterface::class)
+                );
+            }
+            $maskers[] = $masker;
+        }
+        $this->bodyMaskers = $maskers;
     }
 
     /**
@@ -52,6 +75,21 @@ class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
     /**
      * @inheritDoc
      */
+    public function sanitizeBody(string $body): string
+    {
+        foreach ($this->bodyMaskers as $masker) {
+            $masked = $masker->mask($body, $this);
+            if ($masked !== null) {
+                return $masked;
+            }
+        }
+
+        return $this->isSecretField($body) ? self::MASK : $body;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function sanitizeField(string $field, mixed $value): mixed
     {
         if ($this->isSecretField($field)) {
@@ -66,7 +104,7 @@ class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
      */
     public function isSecretField(string $field): bool
     {
-        $name = strtolower($field);
+        $name = $this->normalise($field);
         foreach ($this->secretFields() as $secret) {
             if (str_contains($name, $secret)) {
                 return true;
@@ -163,12 +201,35 @@ class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
     }
 
     /**
-     * Secret field names, read once per instance
+     * Secret field names, normalised: the mandatory ones and the configured ones, read once per instance
      *
      * @return list<string>
      */
     private function secretFields(): array
     {
-        return $this->secretFields ??= $this->config->getSecretFields();
+        if ($this->secretFields !== null) {
+            return $this->secretFields;
+        }
+
+        $fields = [];
+        foreach (array_merge(array_values($this->mandatorySecretFields), $this->config->getSecretFields()) as $field) {
+            $field = $this->normalise($field);
+            if ($field !== '') {
+                $fields[$field] = $field;
+            }
+        }
+
+        return $this->secretFields = array_values($fields);
+    }
+
+    /**
+     * A name as names are compared: lower case, hyphens and spaces read as underscores
+     *
+     * @param string $name
+     * @return string
+     */
+    private function normalise(string $name): string
+    {
+        return str_replace(['-', ' '], '_', strtolower($name));
     }
 }

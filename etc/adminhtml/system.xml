@@ -25,7 +25,7 @@
                 <label>Secrets</label>
                 <field id="secret_fields" translate="label comment" type="text" sortOrder="10" showInDefault="1">
                     <label>Secret Field Names</label>
-                    <comment>A value is masked before it is stored when its field name contains one of these words. Applies to every channel. Values of encrypted settings are always masked.</comment>
+                    <comment>A value is masked before it is stored when its field name contains one of these words; case is ignored and hyphens and spaces count as underscores, so X-Api-Key matches api_key. Applies to every channel. Names containing password, token, secret, authorization, cookie, api_key, apikey or private_key, and values of encrypted settings, are always masked.</comment>
                     <frontend_model>Hryvinskyi\ActivityLog\Block\Adminhtml\System\Config\SecretFieldList</frontend_model>
                     <backend_model>Hryvinskyi\ActivityLog\Model\Config\Backend\SecretFieldList</backend_model>
                 </field>

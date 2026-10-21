@@ -29,6 +29,28 @@
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityStatisticsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\ActivityStatistics"/>
     <preference for="Hryvinskyi\ActivityLog\Model\Dashboard\PreferenceStorageInterface" type="Hryvinskyi\ActivityLog\Model\Dashboard\BookmarkPreferenceStorage"/>
 
+    <type name="Hryvinskyi\ActivityLog\Model\Sanitizer\Sanitizer">
+        <arguments>
+            <!-- Secret whatever the configured list says; the configured names are added to these -->
+            <argument name="mandatorySecretFields" xsi:type="array">
+                <item name="password" xsi:type="string">password</item>
+                <item name="token" xsi:type="string">token</item>
+                <item name="secret" xsi:type="string">secret</item>
+                <item name="authorization" xsi:type="string">authorization</item>
+                <item name="cookie" xsi:type="string">cookie</item>
+                <item name="api_key" xsi:type="string">api_key</item>
+                <item name="apikey" xsi:type="string">apikey</item>
+                <item name="private_key" xsi:type="string">private_key</item>
+            </argument>
+            <!-- Asked in order; a body none of them recognises is treated as plain text -->
+            <argument name="bodyMaskers" xsi:type="array">
+                <item name="json" xsi:type="object" sortOrder="10">Hryvinskyi\ActivityLog\Model\Sanitizer\Body\JsonBodyMasker</item>
+                <item name="xml" xsi:type="object" sortOrder="20">Hryvinskyi\ActivityLog\Model\Sanitizer\Body\XmlBodyMasker</item>
+                <item name="form" xsi:type="object" sortOrder="30">Hryvinskyi\ActivityLog\Model\Sanitizer\Body\FormBodyMasker</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Hryvinskyi\ActivityLog\Model\Dashboard\WidgetPool">
         <arguments>
             <argument name="widgets" xsi:type="array">

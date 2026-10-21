@@ -31,9 +31,21 @@ class JournalPurgerTest extends TestCase
 {
     private const NOW_MS = 1792500000000;
     private const DAY_MS = 86_400_000;
+    private const REST_RETENTION = 'test_channels/rest/retention';
+    private const ADMIN_RETENTION = 'test_channels/admin/retention';
 
-    #[Config('test_channels/rest/retention', '30')]
-    #[Config('test_channels/admin/retention', '90')]
+    /**
+     * Start from an empty journal: the purger works on the whole table, and rows other tests committed would be
+     * counted with the ones a test inserts. The deletion is rolled back with the test.
+     */
+    protected function setUp(): void
+    {
+        $resource = self::service(ResourceConnection::class);
+        $resource->getConnection()->delete($resource->getTableName(ActivityResource::TABLE));
+    }
+
+    #[Config(self::REST_RETENTION, '30')]
+    #[Config(self::ADMIN_RETENTION, '90')]
     #[Config('hryvinskyi_activity_log/retention/orphan_days', '10')]
     public function testEachChannelKeepsItsOwnRetentionAndUnregisteredChannelsTheOrphanOne(): void
     {
@@ -46,8 +58,8 @@ class JournalPurgerTest extends TestCase
         $orphanRecent = $this->insert('uninstalled', 9);
 
         $removed = $this->purger([
-            'rest' => $this->channel('rest', 'test_channels/rest/retention'),
-            'admin' => $this->channel('admin', 'test_channels/admin/retention'),
+            'rest' => $this->channel('rest', self::REST_RETENTION),
+            'admin' => $this->channel('admin', self::ADMIN_RETENTION),
             'entity' => $this->channel('entity', ''),
         ])->purge();
 

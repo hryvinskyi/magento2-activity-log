@@ -14,7 +14,7 @@
                 <enabled>1</enabled>
             </general>
             <security>
-                <secret_fields>password,passwd,token,authorization,api_key,apikey,secret,access_token,refresh_token,private_key,client_secret,card_number,cc_number,cvv,cid,ssn,form_key</secret_fields>
+                <secret_fields>password,passwd,token,authorization,cookie,api_key,apikey,secret,access_token,refresh_token,private_key,client_secret,card_number,cc_number,cvv,cid,ssn,form_key</secret_fields>
             </security>
             <retention>
                 <orphan_days>90</orphan_days>

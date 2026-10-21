@@ -38,7 +38,13 @@ class DashboardDataTest extends AbstractBackendController
         self::assertIsArray($body['summary'] ?? null);
         self::assertCount(4, $body['summary']);
         self::assertIsArray($body['widgets'] ?? null);
-        self::assertSame(['volume', 'slowest_actions', 'top_actors'], array_keys($body['widgets']));
+        foreach (['volume', 'slowest_actions', 'top_actors'] as $ownWidget) {
+            self::assertArrayHasKey(
+                $ownWidget,
+                $body['widgets'],
+                'Other installed modules may add widgets; the journal\'s own ones are always there.'
+            );
+        }
         foreach ($body['widgets'] as $code => $widget) {
             self::assertIsArray($widget);
             self::assertSame('ok', $widget['status'] ?? null, (string) $code);

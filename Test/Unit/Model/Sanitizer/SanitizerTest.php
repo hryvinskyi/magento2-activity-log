@@ -11,6 +11,7 @@ namespace Hryvinskyi\ActivityLog\Test\Unit\Model\Sanitizer;
 
 use Hryvinskyi\ActivityLog\Api\ConfigInterface;
 use Hryvinskyi\ActivityLog\Api\SanitizerInterface;
+use Hryvinskyi\ActivityLog\Model\Sanitizer\Body\JsonBodyMasker;
 use Hryvinskyi\ActivityLog\Model\Sanitizer\Sanitizer;
 use PHPUnit\Framework\TestCase;
 
@@ -88,5 +89,76 @@ class SanitizerTest extends TestCase
     {
         self::assertTrue($this->sanitizer->isSecretField('X-Auth-TOKEN'));
         self::assertFalse($this->sanitizer->isSecretField('sku'));
+    }
+
+    public function testReadsHyphensAndSpacesInANameAsUnderscores(): void
+    {
+        $sanitizer = $this->sanitizer(['api_key', 'set_cookie', 'X-Partner Ref']);
+
+        self::assertTrue($sanitizer->isSecretField('X-Api-Key'));
+        self::assertTrue($sanitizer->isSecretField('Api Key'));
+        self::assertTrue($sanitizer->isSecretField('Set-Cookie'));
+        self::assertTrue($sanitizer->isSecretField('x_partner_ref'));
+        self::assertFalse($sanitizer->isSecretField('X-Api-Version'));
+    }
+
+    public function testMandatoryNamesStaySecretWhateverTheConfigurationHolds(): void
+    {
+        $sanitizer = $this->sanitizer(['sku'], ['password', 'cookie', 'api_key']);
+
+        self::assertTrue($sanitizer->isSecretField('Set-Cookie'));
+        self::assertTrue($sanitizer->isSecretField('Cookie'));
+        self::assertTrue($sanitizer->isSecretField('X-Api-Key'));
+        self::assertTrue($sanitizer->isSecretField('customer_password'));
+        self::assertTrue($sanitizer->isSecretField('sku'));
+        self::assertFalse($sanitizer->isSecretField('email'));
+        self::assertFalse($this->sanitizer([])->isSecretField('Set-Cookie'));
+    }
+
+    public function testHeaderNamesAreMaskedWhenTheyNameASecret(): void
+    {
+        $sanitized = $this->sanitizer(['token'], ['cookie', 'api_key'])->sanitize([
+            'X-Api-Key' => 'k3y',
+            'Set-Cookie' => 'PHPSESSID=abc',
+            'Accept' => 'application/json',
+        ]);
+
+        self::assertSame([
+            'X-Api-Key' => SanitizerInterface::MASK,
+            'Set-Cookie' => SanitizerInterface::MASK,
+            'Accept' => 'application/json',
+        ], $sanitized);
+    }
+
+    public function testSanitizeKeepsPlainTextThatNamesASecret(): void
+    {
+        self::assertSame('my password is hunter2', $this->sanitizer->sanitize('my password is hunter2'));
+        self::assertSame('password=hunter2', $this->sanitizer->sanitize('password=hunter2'));
+    }
+
+    public function testRejectsABodyMaskerOfTheWrongType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('"broken"');
+
+        new Sanitizer($this->createStub(ConfigInterface::class), [], [
+            'json' => new JsonBodyMasker(),
+            'broken' => new \stdClass(),
+        ]);
+    }
+
+    /**
+     * A sanitizer reading these configured names, plus these mandatory ones
+     *
+     * @param list<string> $configured
+     * @param list<string> $mandatory
+     * @return Sanitizer
+     */
+    private function sanitizer(array $configured, array $mandatory = []): Sanitizer
+    {
+        $config = $this->createStub(ConfigInterface::class);
+        $config->method('getSecretFields')->willReturn($configured);
+
+        return new Sanitizer($config, $mandatory);
     }
 }
