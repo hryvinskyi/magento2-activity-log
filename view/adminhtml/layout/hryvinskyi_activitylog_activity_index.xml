@@ -15,7 +15,11 @@
     <body>
         <referenceContainer name="content">
             <block class="Magento\Backend\Block\Template" name="activity.grid.actions"
-                   template="Hryvinskyi_ActivityLog::activity/grid-actions.phtml" before="-"/>
+                   template="Hryvinskyi_ActivityLog::activity/grid-actions.phtml" before="-">
+                <arguments>
+                    <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
+                </arguments>
+            </block>
             <container name="activity.grid" htmlTag="div" htmlClass="activity-log-grid">
                 <uiComponent name="hryvinskyi_activity_log_listing"/>
             </container>

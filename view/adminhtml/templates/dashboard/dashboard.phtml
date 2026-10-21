@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Hryvinskyi\ActivityLog\Api\IconsInterface;
 use Hryvinskyi\ActivityLog\ViewModel\DashboardPage;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
@@ -20,6 +21,10 @@ $page = $block->getData('page');
 if (!$page instanceof DashboardPage) {
     return;
 }
+$icons = $block->getData('icons');
+$icon = static fn (string $id, string $class): string => $icons instanceof IconsInterface
+    ? $icons->render($id, $class)
+    : '';
 ?>
 <div class="activity-dashboard" data-mage-init='{"Hryvinskyi_ActivityLog/js/dashboard/dashboard": {}}'>
     <script type="application/json" data-role="dashboard-config">
@@ -31,10 +36,7 @@ if (!$page instanceof DashboardPage) {
         <div class="activity-page-header__actions">
             <?= $block->getChildHtml('dashboard.actions') ?>
             <a class="activity-button activity-button--primary" href="<?= $escaper->escapeUrl($page->gridUrl()) ?>">
-                <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8 6h13M8 12h13M8 18h13"/>
-                    <path d="M3 6h.01M3 12h.01M3 18h.01"/>
-                </svg>
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::list', 'activity-button__icon') ?>
                 <?= $escaper->escapeHtml(__('View All Activity')) ?>
             </a>
         </div>
@@ -88,6 +90,12 @@ if (!$page instanceof DashboardPage) {
             </button>
         </div>
     </div>
+
+    <?php foreach (['up' => 'trending-up', 'down' => 'trending-down', 'flat' => 'minus'] as $direction => $name): ?>
+        <template data-role="trend-icon" data-direction="<?= $escaper->escapeHtmlAttr($direction) ?>">
+            <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::' . $name, 'activity-card__trend') ?>
+        </template>
+    <?php endforeach; ?>
 
     <div class="activity-summary" data-role="summary" aria-live="polite">
         <?php for ($i = 0; $i < 4; $i++): ?>

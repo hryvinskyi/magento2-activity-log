@@ -46,11 +46,28 @@ define([
     }
 
     /**
+     * The trend icons the page printed, by direction
+     *
+     * @param {HTMLElement} root
+     * @returns {Object<string, Node>}
+     */
+    function readTrendIcons(root) {
+        var icons = {};
+
+        root.querySelectorAll('template[data-role="trend-icon"]').forEach(function (template) {
+            icons[template.dataset.direction] = template.content;
+        });
+
+        return icons;
+    }
+
+    /**
      * @param {Object} config
      * @param {HTMLElement} root
      */
     function mount(config, root) {
         var settings = readConfig(root),
+            trendIcons = readTrendIcons(root),
             wording = settings.wording,
             chipOrder = Array.prototype.map.call(root.querySelectorAll('[data-role="channel"]'), function (chip) {
                 return chip.dataset.code;
@@ -161,7 +178,13 @@ define([
 
         /** Shows the loaded data. */
         function draw() {
-            summaryView.render(root.querySelector('[data-role="summary"]'), state.data.summary, wording, state.periodDays);
+            summaryView.render(
+                root.querySelector('[data-role="summary"]'),
+                state.data.summary,
+                wording,
+                state.periodDays,
+                trendIcons
+            );
             Object.keys(settings.widgets).forEach(drawWidget);
             root.querySelector('[data-role="updated"]').textContent = wording.updated.replace(
                 '%1',

@@ -43,6 +43,11 @@ class ActivityViewTest extends AbstractBackendController
         self::assertStringContainsString('execute_ability cms.block_repository.save', $html);
         self::assertStringContainsString('activitylog/activity/view/id/' . $trigger, $html);
         self::assertStringContainsString('+38 ms', $html);
+        foreach (['arrow-left', 'trash-2', 'link'] as $icon) {
+            self::assertStringContainsString('class="activity-button__icon lucide lucide-' . $icon . '"', $html);
+        }
+        self::assertStringContainsString('class="activity-timeline__open-icon lucide lucide-arrow-right"', $html);
+        self::assertStringContainsString('class="menu-item-icon lucide lucide-layout-dashboard"', $html);
     }
 
     public function testSaysWhenTheActivityIsGone(): void

@@ -13,6 +13,7 @@
     <preference for="Hryvinskyi\ActivityLog\Api\Data\SubjectInterface" type="Hryvinskyi\ActivityLog\Model\Data\Subject"/>
     <preference for="Hryvinskyi\ActivityLog\Api\Data\OriginInterface" type="Hryvinskyi\ActivityLog\Model\Data\Origin"/>
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityRecorderInterface" type="Hryvinskyi\ActivityLog\Model\ActivityRecorder"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\IconsInterface" type="Hryvinskyi\ActivityLog\ViewModel\Icons"/>
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityBuilderInterface" type="Hryvinskyi\ActivityLog\Model\ActivityBuilder"/>
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityRepositoryInterface" type="Hryvinskyi\ActivityLog\Model\ActivityRepository"/>
     <preference for="Hryvinskyi\ActivityLog\Api\ActorContextInterface" type="Hryvinskyi\ActivityLog\Model\Actor\ActorContext"/>

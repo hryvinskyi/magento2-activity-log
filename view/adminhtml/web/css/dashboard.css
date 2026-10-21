@@ -169,6 +169,18 @@
     font-size: 12px;
 }
 
+.activity-card__change {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.activity-card__trend {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+}
+
 .activity-card__delta--good {
     color: #1e7b3c;
 }

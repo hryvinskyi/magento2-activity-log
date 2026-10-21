@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Hryvinskyi\ActivityLog\Api\IconsInterface;
 use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
 use Hryvinskyi\ActivityLog\ViewModel\Operation;
 use Magento\Framework\View\Element\Template;
@@ -22,6 +23,10 @@ $operation = $block->getData('operation');
 if (!$detail instanceof ActivityDetail || !$operation instanceof Operation) {
     return;
 }
+$icons = $block->getData('icons');
+$icon = static fn (string $id, string $class): string => $icons instanceof IconsInterface
+    ? $icons->render($id, $class)
+    : '';
 $activity = $detail->activity();
 if ($activity === null) {
     return;
@@ -70,7 +75,15 @@ $items = $operation->items();
                             <?= $escaper->escapeHtml($item['outcomeLabel']) ?>
                         </span>
                         <span class="activity-timeline__open">
-                            <?= $escaper->escapeHtml($item['current'] ? __('Viewing') : __('Open →')) ?>
+                            <?php if ($item['current']): ?>
+                                <?= $escaper->escapeHtml(__('Viewing')) ?>
+                            <?php else: ?>
+                                <?= $escaper->escapeHtml(__('Open')) ?>
+                                <?= /* @noEscape */ $icon(
+                                    'Hryvinskyi_ActivityLog::arrow-right',
+                                    'activity-timeline__open-icon'
+                                ) ?>
+                            <?php endif; ?>
                         </span>
                     </a>
                 </li>

@@ -5,12 +5,11 @@
  */
 
 /**
- * Draws the summary cards: value, change against the previous period with an arrow, and its tone.
+ * Draws the summary cards: value, change against the previous period with a trend icon, and its tone. The icons
+ * come from the page, one per direction ("up", "down", "flat").
  */
 define([], function () {
     'use strict';
-
-    var ARROWS = Object.freeze({up: '▲', down: '▼', flat: '▬'});
 
     /**
      * @param {string} tag
@@ -28,12 +27,31 @@ define([], function () {
     }
 
     /**
+     * @param {string} direction
+     * @param {string} text
+     * @param {Object<string, Node>} trendIcons
+     * @returns {HTMLElement}
+     */
+    function change(direction, text, trendIcons) {
+        var node = element('strong', 'activity-card__change', ''),
+            icon = Object.prototype.hasOwnProperty.call(trendIcons, direction) ? trendIcons[direction] : null;
+
+        if (icon) {
+            node.appendChild(icon.cloneNode(true));
+        }
+        node.appendChild(document.createTextNode(text));
+
+        return node;
+    }
+
+    /**
      * @param {Object} card
      * @param {{vsPrevious: string, noData: string}} wording
      * @param {number} periodDays
+     * @param {Object<string, Node>} trendIcons
      * @returns {HTMLElement}
      */
-    function cardElement(card, wording, periodDays) {
+    function cardElement(card, wording, periodDays, trendIcons) {
         var node = element('div', 'activity-card', ''),
             value,
             delta;
@@ -52,7 +70,7 @@ define([], function () {
         node.appendChild(value);
 
         delta = element('div', 'activity-card__delta activity-card__delta--' + card.tone, '');
-        delta.appendChild(element('strong', '', (ARROWS[card.direction] || '') + ' ' + card.delta));
+        delta.appendChild(change(card.direction, card.delta, trendIcons));
         delta.appendChild(element('span', 'activity-card__previous', wording.vsPrevious.replace('%1', periodDays)));
         node.appendChild(delta);
 
@@ -64,10 +82,11 @@ define([], function () {
      * @param {Array<Object>} cards
      * @param {Object} wording
      * @param {number} periodDays
+     * @param {Object<string, Node>} trendIcons
      */
-    function render(container, cards, wording, periodDays) {
+    function render(container, cards, wording, periodDays, trendIcons) {
         container.replaceChildren.apply(container, cards.map(function (card) {
-            return cardElement(card, wording, periodDays);
+            return cardElement(card, wording, periodDays, trendIcons || {});
         }));
     }
 

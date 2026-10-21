@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Hryvinskyi\ActivityLog\Api\IconsInterface;
 use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\Escaper;
@@ -20,6 +21,10 @@ $detail = $block->getData('detail');
 if (!$detail instanceof ActivityDetail) {
     return;
 }
+$icons = $block->getData('icons');
+$icon = static fn (string $id, string $class): string => $icons instanceof IconsInterface
+    ? $icons->render($id, $class)
+    : '';
 $activity = $detail->activity();
 $requestedId = $detail->requestedId();
 ?>
@@ -42,9 +47,7 @@ $requestedId = $detail->requestedId();
     </div>
     <div class="activity-page-header__actions">
         <a class="activity-button" href="<?= $escaper->escapeUrl($detail->gridUrl()) ?>">
-            <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
+            <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::arrow-left', 'activity-button__icon') ?>
             <?= $escaper->escapeHtml(__('Back')) ?>
         </a>
         <?php if ($activity !== null): ?>
@@ -54,20 +57,14 @@ $requestedId = $detail->requestedId();
                       data-mage-init='<?= $escaper->escapeHtmlAttr($detail->deleteConfirmInit()) ?>'>
                     <?= $block->getBlockHtml('formkey') ?>
                     <button type="submit" class="activity-button">
-                        <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
-                            <path d="M10 11v6M14 11v6"/>
-                        </svg>
+                        <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::trash-2', 'activity-button__icon') ?>
                         <?= $escaper->escapeHtml(__('Delete')) ?>
                     </button>
                 </form>
             <?php endif; ?>
             <a class="activity-button activity-button--primary"
                  href="<?= $escaper->escapeUrl($detail->relatedUrl($activity)) ?>">
-                <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5"/>
-                    <path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7L12 19"/>
-                </svg>
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::link', 'activity-button__icon') ?>
                 <?= $escaper->escapeHtml(__('Show related in grid')) ?>
             </a>
         <?php endif; ?>

@@ -23,6 +23,7 @@
                    template="Hryvinskyi_ActivityLog::dashboard/dashboard.phtml">
                 <arguments>
                     <argument name="page" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\DashboardPage</argument>
+                    <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
                 </arguments>
                 <container name="dashboard.actions" as="dashboard.actions"/>
             </block>

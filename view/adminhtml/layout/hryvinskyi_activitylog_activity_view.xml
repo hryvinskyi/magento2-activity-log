@@ -23,6 +23,7 @@
                        template="Hryvinskyi_ActivityLog::activity/header.phtml">
                     <arguments>
                         <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
+                        <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
                     </arguments>
                 </block>
                 <block class="Magento\Framework\View\Element\Template" name="activity.facts"
@@ -37,6 +38,7 @@
                     <arguments>
                         <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
                         <argument name="operation" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\Operation</argument>
+                        <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
                     </arguments>
                 </block>
                 <container name="activity.channel.panel" htmlTag="div" htmlClass="activity-channel-panel">
