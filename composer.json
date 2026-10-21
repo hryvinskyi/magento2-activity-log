@@ -1,0 +1,34 @@
+{
+    "name": "hryvinskyi/magento2-activity-log",
+    "description": "One journal of who did what in the store back office, through which channel and with what outcome; dashboard, grid and detail views that channel modules extend",
+    "type": "magento2-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Volodymyr Hryvinskyi",
+            "email": "volodymyr@hryvinskyi.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "hryvinskyi/magento2-base": "^2.2",
+        "hryvinskyi/magento2-configuration-fields": "^1.0.11",
+        "magento/framework": "*",
+        "magento/module-authorization": "*",
+        "magento/module-backend": "*",
+        "magento/module-config": "*",
+        "magento/module-customer": "*",
+        "magento/module-integration": "*",
+        "magento/module-store": "*",
+        "magento/module-ui": "*",
+        "magento/module-user": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Hryvinskyi\\ActivityLog\\": ""
+        }
+    }
+}

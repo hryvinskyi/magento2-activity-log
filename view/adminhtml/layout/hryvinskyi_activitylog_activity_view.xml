@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<!--
+    A channel module shows its own panel through the handle hryvinskyi_activitylog_activity_view_channel_{code}:
+    it adds its block to "activity.channel.panel" and removes "activity.channel.fallback".
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="hryvinskyi_activitylog_menu"/>
+    <head>
+        <css src="Hryvinskyi_ActivityLog::css/activity-log.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <container name="activity.detail" htmlTag="div" htmlClass="activity-detail">
+                <block class="Magento\Framework\View\Element\Template" name="activity.header"
+                       template="Hryvinskyi_ActivityLog::activity/header.phtml">
+                    <arguments>
+                        <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
+                    </arguments>
+                </block>
+                <block class="Magento\Framework\View\Element\Template" name="activity.facts"
+                       template="Hryvinskyi_ActivityLog::activity/facts.phtml">
+                    <arguments>
+                        <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
+                        <argument name="operation" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\Operation</argument>
+                    </arguments>
+                </block>
+                <block class="Magento\Framework\View\Element\Template" name="activity.operation"
+                       template="Hryvinskyi_ActivityLog::activity/operation.phtml">
+                    <arguments>
+                        <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
+                        <argument name="operation" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\Operation</argument>
+                    </arguments>
+                </block>
+                <container name="activity.channel.panel" htmlTag="div" htmlClass="activity-channel-panel">
+                    <block class="Magento\Framework\View\Element\Template" name="activity.channel.fallback"
+                           template="Hryvinskyi_ActivityLog::activity/channel-fallback.phtml">
+                        <arguments>
+                            <argument name="detail" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\ActivityDetail</argument>
+                        </arguments>
+                    </block>
+                </container>
+            </container>
+        </referenceContainer>
+    </body>
+</page>

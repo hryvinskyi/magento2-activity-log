@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Hryvinskyi_ActivityLog::activity_log" title="Activity Log" translate="title"
+             module="Hryvinskyi_ActivityLog" sortOrder="15" parent="Magento_Backend::system"
+             resource="Hryvinskyi_ActivityLog::activity_log"/>
+        <add id="Hryvinskyi_ActivityLog::activity_dashboard" title="Dashboard" translate="title"
+             module="Hryvinskyi_ActivityLog" sortOrder="10" parent="Hryvinskyi_ActivityLog::activity_log"
+             action="activitylog/dashboard/index" resource="Hryvinskyi_ActivityLog::dashboard"/>
+        <add id="Hryvinskyi_ActivityLog::activity_grid" title="All Activity" translate="title"
+             module="Hryvinskyi_ActivityLog" sortOrder="20" parent="Hryvinskyi_ActivityLog::activity_log"
+             action="activitylog/activity/index" resource="Hryvinskyi_ActivityLog::view"/>
+    </menu>
+</config>

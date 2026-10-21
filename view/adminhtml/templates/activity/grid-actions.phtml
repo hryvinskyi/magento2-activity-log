@@ -1,0 +1,45 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/**
+ * Page actions of the activity grid
+ *
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+$exportInit = [
+    'Hryvinskyi_ActivityLog/js/grid/export-trigger' => [
+        'exportButton' => 'hryvinskyi_activity_log_listing.hryvinskyi_activity_log_listing.listing_top.export_button',
+        'option' => 'csv',
+    ],
+];
+?>
+<div class="activity-page-actions">
+    <?= $block->getChildHtml() ?>
+    <a class="activity-button" href="<?= $escaper->escapeUrl($block->getUrl('activitylog/dashboard/index')) ?>">
+        <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        <?= $escaper->escapeHtml(__('View Dashboard')) ?>
+    </a>
+    <button type="button" class="activity-button activity-button--primary"
+            data-mage-init='<?= $escaper->escapeHtmlAttr((string) json_encode($exportInit)) ?>'>
+        <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12M7 10l5 5 5-5"/>
+            <path d="M4 19h16"/>
+        </svg>
+        <?= $escaper->escapeHtml(__('Export CSV')) ?>
+    </button>
+</div>

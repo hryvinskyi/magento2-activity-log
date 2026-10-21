@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<!--
+    The Activity Log menu. A channel module adds its own entries by shipping a layout file of this handle that
+    adds items to the "items" argument of the block below.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Hryvinskyi_Base::css/styles.css"/>
+    </head>
+    <body>
+        <referenceBlock name="page.title">
+            <block class="Hryvinskyi\Base\Block\Adminhtml\Menu" name="hryvinskyi.activity.log.menu">
+                <arguments>
+                    <argument name="menu_title" xsi:type="string" translate="true">Activity Log</argument>
+                    <argument name="items" xsi:type="array">
+                        <item name="dashboard" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">Dashboard</item>
+                            <item name="route" xsi:type="string">activitylog/dashboard/index</item>
+                            <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::dashboard</item>
+                            <item name="sort_order" xsi:type="number">5</item>
+                            <item name="icon" xsi:type="string"><![CDATA[<svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/></svg>]]></item>
+                        </item>
+                        <item name="all_activity" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">All Activity</item>
+                            <item name="route" xsi:type="string">activitylog/activity/index</item>
+                            <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::view</item>
+                            <item name="sort_order" xsi:type="number">10</item>
+                            <item name="icon" xsi:type="string"><![CDATA[<svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>]]></item>
+                        </item>
+                        <item name="configuration" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">Configuration</item>
+                            <item name="route" xsi:type="string">adminhtml/system_config/edit</item>
+                            <item name="route_params" xsi:type="array">
+                                <item name="section" xsi:type="string">hryvinskyi_activity_log</item>
+                            </item>
+                            <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::config</item>
+                            <item name="sort_order" xsi:type="number">100</item>
+                            <item name="icon" xsi:type="string"><![CDATA[<svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>]]></item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

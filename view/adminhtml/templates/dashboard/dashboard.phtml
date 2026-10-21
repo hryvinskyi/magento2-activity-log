@@ -1,0 +1,139 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\ViewModel\DashboardPage;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/**
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$page = $block->getData('page');
+if (!$page instanceof DashboardPage) {
+    return;
+}
+?>
+<div class="activity-dashboard" data-mage-init='{"Hryvinskyi_ActivityLog/js/dashboard/dashboard": {}}'>
+    <script type="application/json" data-role="dashboard-config">
+        <?= /* @noEscape */ $page->scriptConfigJson() ?>
+    </script>
+
+    <div class="activity-page-header">
+        <h1 class="activity-heading"><?= $escaper->escapeHtml(__('Activity Dashboard')) ?></h1>
+        <div class="activity-page-header__actions">
+            <?= $block->getChildHtml('dashboard.actions') ?>
+            <a class="activity-button activity-button--primary" href="<?= $escaper->escapeUrl($page->gridUrl()) ?>">
+                <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 6h13M8 12h13M8 18h13"/>
+                    <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+                </svg>
+                <?= $escaper->escapeHtml(__('View All Activity')) ?>
+            </a>
+        </div>
+    </div>
+
+    <?php if (!$page->isRecording()): ?>
+        <div class="message message-warning activity-dashboard__notice">
+            <?= $escaper->escapeHtml(
+                __('Activity logging is disabled. Widgets show historical data only; nothing new is recorded.')
+            ) ?>
+            <a href="<?= $escaper->escapeUrl($page->settingsUrl()) ?>">
+                <?= $escaper->escapeHtml(__('Enable logging')) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+    <div class="message message-error activity-dashboard__notice" data-role="load-error" hidden>
+        <span data-role="load-error-text"></span>
+        <button type="button" class="action-default" data-role="retry-all">
+            <?= $escaper->escapeHtml(__('Retry all')) ?>
+        </button>
+    </div>
+
+    <div class="activity-dashboard__toolbar">
+        <div class="activity-dashboard__filters">
+            <div class="activity-segmented" role="group" aria-label="<?= $escaper->escapeHtmlAttr(__('Period')) ?>">
+                <?php foreach ($page->periods() as $period): ?>
+                    <button type="button" class="activity-segmented__option" data-role="period"
+                            data-days="<?= (int) $period['days'] ?>"
+                            aria-pressed="<?= $period['active'] ? 'true' : 'false' ?>">
+                        <?= $escaper->escapeHtml($period['label']) ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+            <div class="activity-chips">
+                <span class="activity-chips__label"><?= $escaper->escapeHtml(__('Channels')) ?></span>
+                <?php foreach ($page->channels() as $channel): ?>
+                    <button type="button" class="activity-chip-toggle" data-role="channel"
+                            data-code="<?= $escaper->escapeHtmlAttr($channel['code']) ?>"
+                            style="--activity-chip-color: <?= $escaper->escapeHtmlAttr($channel['chart']) ?>"
+                            aria-pressed="<?= $channel['active'] ? 'true' : 'false' ?>">
+                        <span class="activity-chip-toggle__dot" aria-hidden="true"></span>
+                        <?= $escaper->escapeHtml($channel['label']) ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div class="activity-dashboard__status">
+            <span data-role="updated"></span> ·
+            <button type="button" class="activity-link" data-role="refresh">
+                <?= $escaper->escapeHtml(__('Refresh')) ?>
+            </button>
+        </div>
+    </div>
+
+    <div class="activity-summary" data-role="summary" aria-live="polite">
+        <?php for ($i = 0; $i < 4; $i++): ?>
+            <div class="activity-card activity-card--loading">
+                <div class="activity-skeleton activity-skeleton--label"></div>
+                <div class="activity-skeleton activity-skeleton--value"></div>
+            </div>
+        <?php endfor; ?>
+    </div>
+
+    <div class="activity-widgets">
+        <?php foreach ($page->widgets() as $widget): ?>
+            <section class="activity-widget activity-widget--span-<?= (int) $widget->getSpan() ?>"
+                     data-role="widget" data-code="<?= $escaper->escapeHtmlAttr($widget->getCode()) ?>"
+                     aria-label="<?= $escaper->escapeHtmlAttr($widget->getTitle()) ?>">
+                <header class="activity-widget__header">
+                    <div>
+                        <div class="activity-widget__title">
+                            <?= $escaper->escapeHtml($widget->getTitle()) ?>
+                            <?php if ($widget->getModuleTag() !== null): ?>
+                                <?php $moduleNote = __('Added by the %1 module', $widget->getModuleTag()); ?>
+                                <span class="activity-widget__module"
+                                      title="<?= $escaper->escapeHtmlAttr($moduleNote) ?>">
+                                    <?= $escaper->escapeHtml(__('%1 module', $widget->getModuleTag())) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($widget->getSubtitle() !== null): ?>
+                            <div class="activity-widget__subtitle">
+                                <?= $escaper->escapeHtml($widget->getSubtitle()) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($widget->getViewType()->value === 'line' || $widget->getViewType()->value === 'bar'): ?>
+                        <button type="button"
+                                  class="activity-widget__toggle"
+                                  data-role="toggle-table"
+                                  aria-pressed="false">
+                            <?= $escaper->escapeHtml(__('Table')) ?>
+                        </button>
+                    <?php endif; ?>
+                </header>
+                <div class="activity-widget__body" data-role="widget-body">
+                    <div class="activity-skeleton activity-skeleton--chart"></div>
+                </div>
+            </section>
+        <?php endforeach; ?>
+    </div>
+</div>

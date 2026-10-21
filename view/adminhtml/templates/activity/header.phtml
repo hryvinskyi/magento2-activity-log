@@ -1,0 +1,88 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/**
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$detail = $block->getData('detail');
+if (!$detail instanceof ActivityDetail) {
+    return;
+}
+$activity = $detail->activity();
+$requestedId = $detail->requestedId();
+?>
+<div class="activity-page-header">
+    <div class="activity-page-header__title">
+        <div class="activity-breadcrumb">
+            <a href="<?= $escaper->escapeUrl($detail->gridUrl()) ?>"><?= $escaper->escapeHtml(__('All activity')) ?></a>
+            › <?= $escaper->escapeHtml(__('Activity #%1', (string) $requestedId)) ?>
+        </div>
+        <?php if ($activity !== null): ?>
+            <h1 class="activity-heading">
+                <span class="activity-heading__action"><?= $escaper->escapeHtml($activity->getAction()) ?></span>
+                <span class="activity-outcome activity-outcome--large activity-outcome--<?=
+                    $escaper->escapeHtmlAttr($activity->getOutcome()->value) ?>">
+                    <span class="activity-outcome__icon" aria-hidden="true"></span>
+                    <?= $escaper->escapeHtml($detail->outcomeLabel($activity)) ?>
+                </span>
+            </h1>
+        <?php endif; ?>
+    </div>
+    <div class="activity-page-header__actions">
+        <a class="activity-button" href="<?= $escaper->escapeUrl($detail->gridUrl()) ?>">
+            <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <?= $escaper->escapeHtml(__('Back')) ?>
+        </a>
+        <?php if ($activity !== null): ?>
+            <?php if ($detail->canDelete()): ?>
+                <form method="post" action="<?= $escaper->escapeUrl($detail->deleteUrl($activity)) ?>"
+                      class="activity-delete-form"
+                      data-mage-init='<?= $escaper->escapeHtmlAttr($detail->deleteConfirmInit()) ?>'>
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <button type="submit" class="activity-button">
+                        <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                        </svg>
+                        <?= $escaper->escapeHtml(__('Delete')) ?>
+                    </button>
+                </form>
+            <?php endif; ?>
+            <a class="activity-button activity-button--primary"
+                 href="<?= $escaper->escapeUrl($detail->relatedUrl($activity)) ?>">
+                <svg class="activity-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5"/>
+                    <path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7L12 19"/>
+                </svg>
+                <?= $escaper->escapeHtml(__('Show related in grid')) ?>
+            </a>
+        <?php endif; ?>
+    </div>
+</div>
+<?php if ($activity === null): ?>
+    <div class="message message-warning activity-not-found">
+        <?= $escaper->escapeHtml(
+            __(
+                'Activity #%1 no longer exists. It was deleted or removed by the retention policy.',
+                (string) $requestedId
+            )
+        ) ?>
+        <a href="<?= $escaper->escapeUrl($detail->gridUrl()) ?>">
+            <?= $escaper->escapeHtml(__('Back to all activity')) ?>
+        </a>
+    </div>
+<?php endif; ?>

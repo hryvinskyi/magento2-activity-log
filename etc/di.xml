@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\ActivityInterface" type="Hryvinskyi\ActivityLog\Model\Data\Activity"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\ActorInterface" type="Hryvinskyi\ActivityLog\Model\Data\Actor"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\SubjectInterface" type="Hryvinskyi\ActivityLog\Model\Data\Subject"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\OriginInterface" type="Hryvinskyi\ActivityLog\Model\Data\Origin"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActivityRecorderInterface" type="Hryvinskyi\ActivityLog\Model\ActivityRecorder"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActivityBuilderInterface" type="Hryvinskyi\ActivityLog\Model\ActivityBuilder"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActivityRepositoryInterface" type="Hryvinskyi\ActivityLog\Model\ActivityRepository"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActorContextInterface" type="Hryvinskyi\ActivityLog\Model\Actor\ActorContext"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\CorrelationScopeInterface" type="Hryvinskyi\ActivityLog\Model\Correlation\CorrelationScope"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\SanitizerInterface" type="Hryvinskyi\ActivityLog\Model\Sanitizer\Sanitizer"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ChannelPoolInterface" type="Hryvinskyi\ActivityLog\Model\Channel\ChannelPool"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ConfigInterface" type="Hryvinskyi\ActivityLog\Model\Config"/>
+    <preference for="Hryvinskyi\ActivityLog\Model\Correlation\IdGeneratorInterface" type="Hryvinskyi\ActivityLog\Model\Correlation\RandomIdGenerator"/>
+    <preference for="Hryvinskyi\ActivityLog\Model\Correlation\IncomingIdInterface" type="Hryvinskyi\ActivityLog\Model\Correlation\HttpHeaderIncomingId"/>
+    <preference for="Hryvinskyi\ActivityLog\Model\Origin\OriginResolverInterface" type="Hryvinskyi\ActivityLog\Model\Origin\RequestOriginResolver"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\MillisecondClockInterface" type="Hryvinskyi\ActivityLog\Model\Clock\SystemMillisecondClock"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\DashboardQueryInterface" type="Hryvinskyi\ActivityLog\Model\Data\DashboardQuery"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActivityPrunerInterface" type="Hryvinskyi\ActivityLog\Model\Retention\ActivityPruner"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActivityStatisticsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\ActivityStatistics"/>
+    <preference for="Hryvinskyi\ActivityLog\Model\Dashboard\PreferenceStorageInterface" type="Hryvinskyi\ActivityLog\Model\Dashboard\BookmarkPreferenceStorage"/>
+
+    <type name="Hryvinskyi\ActivityLog\Model\Dashboard\WidgetPool">
+        <arguments>
+            <argument name="widgets" xsi:type="array">
+                <item name="volume" xsi:type="object" sortOrder="10">Hryvinskyi\ActivityLog\Model\Dashboard\Widget\VolumeWidget</item>
+                <item name="slowest_actions" xsi:type="object" sortOrder="20">Hryvinskyi\ActivityLog\Model\Dashboard\Widget\SlowestActionsWidget</item>
+                <item name="top_actors" xsi:type="object" sortOrder="30">Hryvinskyi\ActivityLog\Model\Dashboard\Widget\TopActorsWidget</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Hryvinskyi\ActivityLog\Model\Actor\ActorContext">
+        <arguments>
+            <argument name="resolvers" xsi:type="array">
+                <item name="user_context" xsi:type="object" sortOrder="100">Hryvinskyi\ActivityLog\Model\Actor\Resolver\UserContextActorResolver</item>
+                <item name="process" xsi:type="object" sortOrder="200">Hryvinskyi\ActivityLog\Model\Actor\Resolver\ProcessActorResolver</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Proxies: an account's repository is built only when an activity names that kind of account -->
+    <type name="Hryvinskyi\ActivityLog\Model\Actor\Resolver\UserContextActorResolver">
+        <arguments>
+            <argument name="nameLookups" xsi:type="array">
+                <item name="1" xsi:type="object">Hryvinskyi\ActivityLog\Model\Actor\NameLookup\IntegrationNameLookup\Proxy</item>
+                <item name="2" xsi:type="object">Hryvinskyi\ActivityLog\Model\Actor\NameLookup\AdminUserNameLookup\Proxy</item>
+                <item name="3" xsi:type="object">Hryvinskyi\ActivityLog\Model\Actor\NameLookup\CustomerNameLookup\Proxy</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Hryvinskyi\ActivityLog\Model\ResourceModel\Activity\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">hryvinskyi_activity_log</argument>
+            <argument name="resourceModel" xsi:type="string">Hryvinskyi\ActivityLog\Model\ResourceModel\Activity</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="hryvinskyi_activity_log_listing_data_source" xsi:type="string">Hryvinskyi\ActivityLog\Model\ResourceModel\Activity\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Hryvinskyi\ActivityLog\Cron\ApplyRetention">
+        <arguments>
+            <argument name="purgers" xsi:type="array">
+                <item name="journal" xsi:type="object" sortOrder="1000">Hryvinskyi\ActivityLog\Model\Retention\JournalPurger</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Settings are saved from the command line too, where only global wiring exists -->
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Config\Backend\SecretFieldList"
+                 type="Hryvinskyi\ConfigurationFields\Model\Config\Backend\TagList">
+        <arguments>
+            <argument name="tagListConfig" xsi:type="array">
+                <item name="separator" xsi:type="string">,</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>

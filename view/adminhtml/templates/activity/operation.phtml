@@ -1,0 +1,80 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
+use Hryvinskyi\ActivityLog\ViewModel\Operation;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/**
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$detail = $block->getData('detail');
+$operation = $block->getData('operation');
+if (!$detail instanceof ActivityDetail || !$operation instanceof Operation) {
+    return;
+}
+$activity = $detail->activity();
+if ($activity === null) {
+    return;
+}
+$items = $operation->items();
+?>
+<details class="activity-section activity-operation" open>
+    <summary class="activity-section__summary">
+        <span class="activity-section__title"><?= $escaper->escapeHtml(__('Same operation')) ?></span>
+        <span class="activity-section__note">
+            <?= $escaper->escapeHtml(__('%1 activities share correlation ID', $operation->size())) ?>
+            <span class="activity-mono"><?= $escaper->escapeHtml(substr($activity->getCorrelationId(), 0, 6)) ?></span>
+            · <?= $escaper->escapeHtml(__('total %1 ms', number_format($operation->totalMs()))) ?>
+        </span>
+    </summary>
+    <?php if (count($items) < 2): ?>
+        <p class="activity-operation__single">
+            <?= $escaper->escapeHtml(__('No other activity shares this correlation ID.')) ?>
+        </p>
+    <?php else: ?>
+        <ol class="activity-timeline">
+            <?php foreach ($items as $item): ?>
+                <li class="activity-timeline__item<?= $item['current'] ? ' activity-timeline__item--current' : '' ?>">
+                    <?php $itemChannel = $item['channel']; ?>
+                    <a class="activity-timeline__link"
+                       href="<?= $escaper->escapeUrl($item['url']) ?>"
+                       <?php if ($item['current']): ?>aria-current="page"<?php endif; ?>>
+                        <span class="activity-timeline__node"
+                              style="--activity-node: <?= $escaper->escapeHtmlAttr($itemChannel['chart']) ?>"></span>
+                        <span class="activity-timeline__time"><strong><?=
+                            $escaper->escapeHtml($item['offset']) ?></strong><br><?=
+                            $escaper->escapeHtml($item['clock']) ?></span>
+                        <span><span class="activity-badge"
+                                    style="background: <?= $escaper->escapeHtmlAttr($itemChannel['bg']) ?>;
+                                           color: <?= $escaper->escapeHtmlAttr($itemChannel['fg']) ?>"><?=
+                                            $escaper->escapeHtml($itemChannel['label']) ?></span></span>
+                        <span class="activity-timeline__text">
+                            <span class="activity-timeline__action"><?= $escaper->escapeHtml($item['action']) ?></span>
+                            <?php if ($item['subject'] !== ''): ?>
+                                <span class="activity-timeline__subject"> · <?=
+                                    $escaper->escapeHtml($item['subject']) ?></span>
+                            <?php endif; ?>
+                        </span>
+                        <span class="activity-timeline__outcome activity-timeline__outcome--<?=
+                            $escaper->escapeHtmlAttr($item['outcome']) ?>">
+                            <?= $escaper->escapeHtml($item['outcomeLabel']) ?>
+                        </span>
+                        <span class="activity-timeline__open">
+                            <?= $escaper->escapeHtml($item['current'] ? __('Viewing') : __('Open →')) ?>
+                        </span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    <?php endif; ?>
+</details>

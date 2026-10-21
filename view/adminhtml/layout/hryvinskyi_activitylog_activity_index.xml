@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="hryvinskyi_activitylog_menu"/>
+    <head>
+        <css src="Hryvinskyi_ActivityLog::css/activity-log.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Template" name="activity.grid.actions"
+                   template="Hryvinskyi_ActivityLog::activity/grid-actions.phtml" before="-"/>
+            <container name="activity.grid" htmlTag="div" htmlClass="activity-log-grid">
+                <uiComponent name="hryvinskyi_activity_log_listing"/>
+            </container>
+        </referenceContainer>
+    </body>
+</page>

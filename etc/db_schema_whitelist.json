@@ -1,0 +1,41 @@
+{
+    "hryvinskyi_activity_log": {
+        "column": {
+            "entity_id": true,
+            "correlation_id": true,
+            "channel": true,
+            "action": true,
+            "subject_type": true,
+            "subject_id": true,
+            "subject_label": true,
+            "actor_type": true,
+            "actor_id": true,
+            "actor_name": true,
+            "via_client": true,
+            "via_version": true,
+            "outcome": true,
+            "message": true,
+            "duration_ms": true,
+            "store_id": true,
+            "ip": true,
+            "user_agent": true,
+            "occurred_at_ms": true,
+            "created_at": true,
+            "via_channel": true
+        },
+        "index": {
+            "HRYVINSKYI_ACTIVITY_LOG_CREATED_AT": true,
+            "HRYVINSKYI_ACTIVITY_LOG_OCCURRED_AT_MS": true,
+            "HRYVINSKYI_ACTIVITY_LOG_CHANNEL_OCCURRED_AT_MS": true,
+            "HRYVINSKYI_ACTIVITY_LOG_CORRELATION_ID": true,
+            "HRYVINSKYI_ACTIVITY_LOG_ACTOR_TYPE_ACTOR_ID": true,
+            "HRYVINSKYI_ACTIVITY_LOG_OUTCOME": true,
+            "HRYVINSKYI_ACTIVITY_LOG_SUBJECT_TYPE_SUBJECT_ID": true,
+            "FTI_2D70F4AF6484CCAE83783CCFCA07C05F": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "HRYVINSKYI_ACTIVITY_LOG_STORE_ID_STORE_STORE_ID": true
+        }
+    }
+}

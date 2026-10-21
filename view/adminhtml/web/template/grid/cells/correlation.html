@@ -1,0 +1,19 @@
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<span class="activity-correlation">
+    <button type="button" class="activity-chip" click="$col.copy.bind($col, $row())"
+            attr="title: $t('Copy the full correlation ID')">
+        <span text="$col.shortId($row())"></span>
+        <span class="activity-chip__copy" aria-hidden="true"></span>
+    </button>
+    <span class="activity-copied" if="$col.isCopied($row())" translate="'Copied'"></span>
+    <button type="button" class="activity-link" if="$col.operationSize($row()) > 1"
+            click="$col.showOperation.bind($col, $row())"
+            attr="title: $t('Show all activities in this operation')"
+            text="'×' + $col.operationSize($row())"></button>
+</span>

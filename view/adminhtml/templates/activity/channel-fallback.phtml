@@ -1,0 +1,40 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/**
+ * Shown when no installed module adds a panel for the activity's channel
+ *
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$detail = $block->getData('detail');
+if (!$detail instanceof ActivityDetail) {
+    return;
+}
+$activity = $detail->activity();
+if ($activity === null) {
+    return;
+}
+?>
+<section class="activity-section">
+    <div class="activity-section__header">
+        <span class="activity-section__title"><?= $escaper->escapeHtml(__('Details')) ?></span>
+    </div>
+    <?php if ($activity->getMessage() !== null): ?>
+        <p><?= $escaper->escapeHtml($activity->getMessage()) ?></p>
+    <?php endif; ?>
+    <p class="activity-section__note">
+        <?= $escaper->escapeHtml(__('No installed module records more about this channel.')) ?>
+    </p>
+</section>

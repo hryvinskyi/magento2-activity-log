@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="Hryvinskyi\ActivityLog\Block\Adminhtml\System\Config\SecretFieldList"
+                 type="Hryvinskyi\ConfigurationFields\Block\Adminhtml\System\Config\Form\Field\TagList">
+        <arguments>
+            <argument name="tagListConfig" xsi:type="array">
+                <item name="placeholder" xsi:type="string" translatable="true">Add a field name and press Enter</item>
+                <item name="validation" xsi:type="string">^[A-Za-z0-9_.\-]+$</item>
+                <item name="separator" xsi:type="string">,</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Ui\Model\Export\MetadataProvider">
+        <plugin name="hryvinskyi_activity_log_export_time" type="Hryvinskyi\ActivityLog\Plugin\Ui\Export\FormatActivityTime"/>
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="hryvinskyi_activity_log_listing" xsi:type="array">
+                    <item name="created_at" xsi:type="string">created_at</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

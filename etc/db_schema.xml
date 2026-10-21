@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="hryvinskyi_activity_log" resource="default" engine="innodb" comment="Activity Log Journal">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Activity ID"/>
+        <column xsi:type="varchar" name="correlation_id" nullable="false" length="64" comment="Operation the activity belongs to"/>
+        <column xsi:type="varchar" name="channel" nullable="false" length="32" comment="Channel code"/>
+        <column xsi:type="varchar" name="action" nullable="false" length="255" comment="Action"/>
+        <column xsi:type="varchar" name="subject_type" nullable="true" length="64" comment="Subject type"/>
+        <column xsi:type="varchar" name="subject_id" nullable="true" length="64" comment="Subject ID"/>
+        <column xsi:type="varchar" name="subject_label" nullable="true" length="255" comment="Subject label"/>
+        <column xsi:type="varchar" name="actor_type" nullable="false" length="16" comment="Actor type"/>
+        <column xsi:type="varchar" name="actor_id" nullable="true" length="64" comment="Actor ID"/>
+        <column xsi:type="varchar" name="actor_name" nullable="false" length="255" comment="Actor name"/>
+        <column xsi:type="varchar" name="via_client" nullable="true" length="128" comment="Delegating client"/>
+        <column xsi:type="varchar" name="via_version" nullable="true" length="32" comment="Delegating client version"/>
+        <column xsi:type="varchar" name="via_channel" nullable="true" length="32" comment="Channel the delegating client acted through"/>
+        <column xsi:type="varchar" name="outcome" nullable="false" length="16" comment="Outcome"/>
+        <column xsi:type="text" name="message" nullable="true" comment="Outcome message"/>
+        <column xsi:type="decimal" name="duration_ms" scale="3" precision="12" unsigned="true" nullable="true" comment="Duration in milliseconds"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" comment="Store ID"/>
+        <column xsi:type="varchar" name="ip" nullable="true" length="45" comment="Remote IP"/>
+        <column xsi:type="varchar" name="user_agent" nullable="true" length="512" comment="User agent"/>
+        <column xsi:type="bigint" name="occurred_at_ms" unsigned="true" nullable="false" comment="Occurred at, ms since epoch (UTC)"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Occurred at (UTC, second precision)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="HRYVINSKYI_ACTIVITY_LOG_STORE_ID_STORE_STORE_ID"
+                    table="hryvinskyi_activity_log" column="store_id"
+                    referenceTable="store" referenceColumn="store_id" onDelete="SET NULL"/>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_OCCURRED_AT_MS" indexType="btree">
+            <column name="occurred_at_ms"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_CHANNEL_OCCURRED_AT_MS" indexType="btree">
+            <column name="channel"/>
+            <column name="occurred_at_ms"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_CORRELATION_ID" indexType="btree">
+            <column name="correlation_id"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_ACTOR" indexType="btree">
+            <column name="actor_type"/>
+            <column name="actor_id"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_OUTCOME" indexType="btree">
+            <column name="outcome"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_KEYWORDS" indexType="fulltext">
+            <column name="action"/>
+            <column name="subject_label"/>
+            <column name="actor_name"/>
+            <column name="correlation_id"/>
+        </index>
+        <index referenceId="HRYVINSKYI_ACTIVITY_LOG_SUBJECT" indexType="btree">
+            <column name="subject_type"/>
+            <column name="subject_id"/>
+        </index>
+    </table>
+</schema>

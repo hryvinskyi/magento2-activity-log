@@ -1,0 +1,12 @@
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<button type="button" class="activity-badge"
+        ko-style="$col.badgeStyle($row())"
+        click="$col.filterByChannel.bind($col, $row())"
+        attr="title: $t('Filter by channel')"
+        text="$col.labelOf($row())"></button>

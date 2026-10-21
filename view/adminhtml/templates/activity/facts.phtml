@@ -1,0 +1,122 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\ViewModel\ActivityDetail;
+use Hryvinskyi\ActivityLog\ViewModel\Operation;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/**
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$detail = $block->getData('detail');
+$operation = $block->getData('operation');
+if (!$detail instanceof ActivityDetail || !$operation instanceof Operation) {
+    return;
+}
+$activity = $detail->activity();
+if ($activity === null) {
+    return;
+}
+$time = $detail->time($activity);
+$duration = $detail->duration($activity);
+$channel = $detail->channel($activity->getChannel());
+$actor = $activity->getActor();
+$origin = $activity->getOrigin();
+$storeName = $detail->storeName($activity);
+$size = $operation->size();
+?>
+<section class="activity-facts">
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Time')) ?></div>
+        <div title="<?= $escaper->escapeHtmlAttr($time['relative']) ?>">
+            <?= $escaper->escapeHtml($time['dateTime']) ?>
+        </div>
+        <div class="activity-fact__note">
+            <?= $escaper->escapeHtml($time['relative'] . ' · ' . $time['timezone']) ?>
+        </div>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Duration')) ?></div>
+        <?php $tinted = $duration['level'] !== 'good'; ?>
+        <div class="activity-duration activity-duration--<?= $escaper->escapeHtmlAttr((string) $duration['level']) ?>"
+             <?php if ($duration['textColor'] !== null && $tinted): ?>
+                 style="color: <?= $escaper->escapeHtmlAttr($duration['textColor']) ?>"
+             <?php endif; ?>>
+            <?php if ($duration['color'] !== null && $tinted): ?>
+                <span class="activity-duration__dot"
+                      style="background: <?= $escaper->escapeHtmlAttr($duration['color']) ?>"></span>
+            <?php endif; ?>
+            <?= $escaper->escapeHtml($duration['text']) ?>
+            <span class="activity-fact__note"><?= $escaper->escapeHtml($duration['note']) ?></span>
+        </div>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Channel')) ?></div>
+        <span class="activity-badge"
+                style="background: <?= $escaper->escapeHtmlAttr($channel['bg']) ?>;
+                       color: <?= $escaper->escapeHtmlAttr($channel['fg']) ?>">
+            <?= $escaper->escapeHtml($channel['label']) ?>
+        </span>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Actor')) ?></div>
+        <div class="activity-actor">
+            <a class="activity-actor__name" href="<?= $escaper->escapeUrl($detail->actorUrl($activity)) ?>">
+                <?= $escaper->escapeHtml($actor->getName()) ?>
+            </a>
+            <span class="activity-actor__type"><?= $escaper->escapeHtml($detail->actorTypeLabel($activity)) ?></span>
+        </div>
+        <?php if ($actor->getViaClient() !== null): ?>
+            <div class="activity-actor__via">
+                <span><?= $escaper->escapeHtml(__('acting through')) ?></span>
+                <?php if ($actor->getViaChannel() !== null): $via = $detail->channel($actor->getViaChannel()); ?>
+                    <span class="activity-badge activity-badge--small"
+                            style="background: <?= $escaper->escapeHtmlAttr($via['bg']) ?>;
+                                   color: <?= $escaper->escapeHtmlAttr($via['fg']) ?>">
+                        <?= $escaper->escapeHtml($via['label']) ?>
+                    </span>
+                <?php endif; ?>
+                <span class="activity-actor__client"><?= $escaper->escapeHtml($actor->getViaClient()) ?></span>
+                <?php if ($actor->getViaVersion() !== null): ?>
+                    <span><?= $escaper->escapeHtml('v' . $actor->getViaVersion()) ?></span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Store')) ?></div>
+        <div><?= $escaper->escapeHtml($storeName ?? '—') ?></div>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('IP')) ?></div>
+        <div class="activity-number"><?= $escaper->escapeHtml($origin->getIp() ?? '—') ?></div>
+        <?php if ($origin->getUserAgent() !== null): ?>
+            <div class="activity-fact__note activity-fact__note--clip"
+                   title="<?= $escaper->escapeHtmlAttr($origin->getUserAgent()) ?>">
+                <?= $escaper->escapeHtml($origin->getUserAgent()) ?>
+            </div>
+        <?php endif; ?>
+    </div>
+    <div class="activity-fact">
+        <div class="activity-fact__label"><?= $escaper->escapeHtml(__('Correlation ID')) ?></div>
+        <div class="activity-correlation">
+            <button type="button" class="activity-chip"
+                    title="<?= $escaper->escapeHtmlAttr(__('Copy')) ?>"
+                    data-mage-init='<?= $escaper->escapeHtmlAttr($detail->copyCorrelationInit($activity)) ?>'>
+                <span><?= $escaper->escapeHtml($activity->getCorrelationId()) ?></span>
+                <span class="activity-chip__copy" aria-hidden="true"></span>
+            </button>
+            <span class="activity-copied" data-role="copied" hidden><?= $escaper->escapeHtml(__('Copied')) ?></span>
+            <span class="activity-fact__note"><?= $escaper->escapeHtml(__('%1 activities', $size)) ?></span>
+        </div>
+    </div>
+</section>
