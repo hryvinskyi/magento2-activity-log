@@ -42,7 +42,8 @@ interface ActivityInterface
     public function getChannel(): string;
 
     /**
-     * What happened, as the channel names it: "POST /V1/products", "catalog/product/save", "Product saved"
+     * What happened, as the channel names it: a request line, a route or a sentence ("POST /partner/orders",
+     * "sales/order/hold", "Order held")
      *
      * @return string
      */

@@ -17,7 +17,7 @@ namespace Hryvinskyi\ActivityLog\Api\Data;
 interface SubjectInterface
 {
     /**
-     * Stable kind of the subject, lowercase: "product", "order", "config_value"
+     * Stable kind of the subject, lowercase: "product", "order", "invoice"
      *
      * @return string
      */

@@ -186,3 +186,110 @@
 "set automatically","set automatically"
 "Magento updated","Magento updated"
 "during a save by","during a save by"
+"Activity #%1 was deleted.","Activity #%1 was deleted."
+"That activity no longer exists.","That activity no longer exists."
+"%1 activities were deleted.","%1 activities were deleted."
+"Activity not found","Activity not found"
+"Activity #%1","Activity #%1"
+"Activity Dashboard","Activity Dashboard"
+"Activity #%1 no longer exists.","Activity #%1 no longer exists."
+"Total activities","Total activities"
+"Avg duration","Avg duration"
+ms,ms
+"Failure rate","Failure rate"
+"Denied attempts","Denied attempts"
+new,new
+"Slowest actions","Slowest actions"
+"Average duration, top %1","Average duration, top %1"
+"Average duration","Average duration"
+"Top actors","Top actors"
+"By number of activities","By number of activities"
+"%1 via %2%3","%1 via %2%3"
+Activities,Activities
+"Failure %","Failure %"
+"Activity volume","Activity volume"
+"Activities per day, by channel","Activities per day, by channel"
+"just now","just now"
+"%1 minutes ago","%1 minutes ago"
+"%1 hours ago","%1 hours ago"
+"%1 days ago","%1 days ago"
+"part of the parent call","part of the parent call"
+"Store #%1","Store #%1"
+"Delete this activity?","Delete this activity?"
+"It is removed from the journal permanently. Other activities of the same operation are kept.","It is removed from the journal permanently. Other activities of the same operation are kept."
+"%1 days","%1 days"
+"vs previous %1 days","vs previous %1 days"
+"No data for this period","No data for this period"
+"No activity in this period","No activity in this period"
+"Try a longer period or switch more channels on.","Try a longer period or switch more channels on."
+"This widget could not be loaded.","This widget could not be loaded."
+"Dashboard data could not be loaded.","Dashboard data could not be loaded."
+Table,Table
+Chart,Chart
+Total,Total
+Label,Label
+"updated %1","updated %1"
+"+0 ms","+0 ms"
+Details,Details
+"No installed module records more about this channel.","No installed module records more about this channel."
+Time,Time
+Duration,Duration
+"acting through","acting through"
+Store,Store
+IP,IP
+"Correlation ID","Correlation ID"
+Copy,Copy
+Copied,Copied
+"%1 activities","%1 activities"
+"All activity","All activity"
+Back,Back
+Delete,Delete
+"Show related in grid","Show related in grid"
+"Activity #%1 no longer exists. It was deleted or removed by the retention policy.","Activity #%1 no longer exists. It was deleted or removed by the retention policy."
+"Back to all activity","Back to all activity"
+"Same operation","Same operation"
+"%1 activities share correlation ID","%1 activities share correlation ID"
+"total %1 ms","total %1 ms"
+"No other activity shares this correlation ID.","No other activity shares this correlation ID."
+Viewing,Viewing
+Open,Open
+"View All Activity","View All Activity"
+"Activity logging is disabled. Widgets show historical data only; nothing new is recorded.","Activity logging is disabled. Widgets show historical data only; nothing new is recorded."
+"Enable logging","Enable logging"
+"Retry all","Retry all"
+Period,Period
+Channels,Channels
+Refresh,Refresh
+"Added by the %1 module","Added by the %1 module"
+"%1 module","%1 module"
+"Show related","Show related"
+"Filter by actor","Filter by actor"
+"Filter by channel","Filter by channel"
+"Copy the full correlation ID","Copy the full correlation ID"
+"Show all activities in this operation","Show all activities in this operation"
+"records found","records found"
+selected,selected
+"Activity Log","Activity Log"
+"View Activity","View Activity"
+"Delete Activity","Delete Activity"
+"Activity Log Settings","Activity Log Settings"
+"Add a field name and press Enter","Add a field name and press Enter"
+"All Activity","All Activity"
+General,General
+"Record Activity","Record Activity"
+"When off, no channel writes to the journal; what is already recorded stays readable.","When off, no channel writes to the journal; what is already recorded stays readable."
+Secrets,Secrets
+"Secret Field Names","Secret Field Names"
+"A value is masked before it is stored when its field name contains one of these words; case is ignored and hyphens and spaces count as underscores, so X-Api-Key matches api_key. Applies to every channel. Names containing password, token, secret, authorization, cookie, api_key, apikey or private_key, and values of encrypted settings, are always masked.","A value is masked before it is stored when its field name contains one of these words; case is ignored and hyphens and spaces count as underscores, so X-Api-Key matches api_key. Applies to every channel. Names containing password, token, secret, authorization, cookie, api_key, apikey or private_key, and values of encrypted settings, are always masked."
+Retention,Retention
+"Keep Activity of Removed Channels (days)","Keep Activity of Removed Channels (days)"
+"Each channel sets its own retention in its module's settings. This applies to activity whose channel module is no longer installed.","Each channel sets its own retention in its module's settings. This applies to activity whose channel module is no longer installed."
+Configuration,Configuration
+CSV,CSV
+"Selected activities will be removed from the journal permanently. Linked activities in the same operation are kept.","Selected activities will be removed from the journal permanently. Linked activities in the same operation are kept."
+"Delete activities?","Delete activities?"
+Action,Action
+Subject,Subject
+"Store View","Store View"
+"User Agent","User Agent"
+"Full Correlation ID","Full Correlation ID"

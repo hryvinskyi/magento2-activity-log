@@ -11,6 +11,8 @@ the journal, its dashboard, its search page and detail page. Channel modules rec
   in JSON, XML, form-encoded and plain-text bodies.
 - Shows the journal in **System › Activity Log**: a dashboard with summary cards and widgets, a search page with a
   timeline and a grid, and a detail page per activity with the rest of its operation.
+- Records an operation of a bulk action (an asynchronous web API call, an admin mass action run by the queue) for the
+  admin or integration that scheduled the bulk, not for the consumer's `cli` process.
 - Deletes old activities by the retention each channel sets, and activities of channels no installed module registers
   after a configurable number of days.
 
@@ -104,6 +106,9 @@ A channel module depends on this package's `Api/` contracts only:
 - `ChannelInterface` is registered in `ChannelPool`'s `channels` argument (code, label, colours, retention).
 - `SanitizerInterface` masks values (`sanitize()`) and message bodies of any format (`sanitizeBody()`).
 - `CorrelationScopeInterface` groups the activities of one operation.
+- `ActorScopeInterface::actAs()` runs work on someone's behalf: what it records is theirs, not the process's. A
+  module whose queue consumer carries out what an admin asked for wraps the work in it.
+- `UserActorsInterface::actorOf()` turns a Magento account (user type and id) into the actor the session would name.
 - `DashboardWidgetInterface` adds a widget to the dashboard's `WidgetPool`.
 - The detail page adds the layout handle `hryvinskyi_activitylog_activity_view_channel_<code>`; a channel puts its
   panel into the `activity.channel.panel` container.
@@ -200,7 +205,8 @@ class InvoiceCondition implements SearchConditionInterface
 `show(search)`, `stop()` and `destroy()`. The options are described at the top of `view/adminhtml/web/js/timeline/timeline.js`.
 
 ## Known limits
-- A denied activity is shown with its Denied outcome and a generic sentence. There is no "tried to change" sentence.
+- A denied activity is described as "tried to change" or "tried to delete" only when its channel's module says so;
+  otherwise it is shown with its Denied outcome and a generic sentence.
 - A search by `text` is matched among the newest 10,000 candidates.
 
 ## License

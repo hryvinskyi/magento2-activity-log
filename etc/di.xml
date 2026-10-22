@@ -23,6 +23,8 @@
     <preference for="Hryvinskyi\ActivityLog\Api\ConfigInterface" type="Hryvinskyi\ActivityLog\Model\Config"/>
     <preference for="Hryvinskyi\ActivityLog\Model\Correlation\IdGeneratorInterface" type="Hryvinskyi\ActivityLog\Model\Correlation\RandomIdGenerator"/>
     <preference for="Hryvinskyi\ActivityLog\Model\Correlation\IncomingIdInterface" type="Hryvinskyi\ActivityLog\Model\Correlation\HttpHeaderIncomingId"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\ActorScopeInterface" type="Hryvinskyi\ActivityLog\Model\Actor\ActorScope"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\UserActorsInterface" type="Hryvinskyi\ActivityLog\Model\Actor\UserActors"/>
     <preference for="Hryvinskyi\ActivityLog\Model\Origin\OriginResolverInterface" type="Hryvinskyi\ActivityLog\Model\Origin\RequestOriginResolver"/>
     <preference for="Hryvinskyi\ActivityLog\Api\MillisecondClockInterface" type="Hryvinskyi\ActivityLog\Model\Clock\SystemMillisecondClock"/>
     <preference for="Hryvinskyi\ActivityLog\Api\Data\DashboardQueryInterface" type="Hryvinskyi\ActivityLog\Model\Data\DashboardQuery"/>
@@ -206,9 +208,15 @@
         </arguments>
     </type>
 
+    <!-- An operation of a bulk action is carried out for the account that scheduled the bulk -->
+    <type name="Magento\AsynchronousOperations\Model\OperationProcessor">
+        <plugin name="hryvinskyi_activity_log_bulk_owner" type="Hryvinskyi\ActivityLog\Plugin\AsynchronousOperations\ActAsBulkOwner"/>
+    </type>
+
     <type name="Hryvinskyi\ActivityLog\Model\Actor\ActorContext">
         <arguments>
             <argument name="resolvers" xsi:type="array">
+                <item name="actor_scope" xsi:type="object" sortOrder="10">Hryvinskyi\ActivityLog\Model\Actor\ActorScope</item>
                 <item name="user_context" xsi:type="object" sortOrder="100">Hryvinskyi\ActivityLog\Model\Actor\Resolver\UserContextActorResolver</item>
                 <item name="process" xsi:type="object" sortOrder="200">Hryvinskyi\ActivityLog\Model\Actor\Resolver\ProcessActorResolver</item>
             </argument>
@@ -216,7 +224,7 @@
     </type>
 
     <!-- Proxies: an account's repository is built only when an activity names that kind of account -->
-    <type name="Hryvinskyi\ActivityLog\Model\Actor\Resolver\UserContextActorResolver">
+    <type name="Hryvinskyi\ActivityLog\Model\Actor\UserActors">
         <arguments>
             <argument name="nameLookups" xsi:type="array">
                 <item name="1" xsi:type="object">Hryvinskyi\ActivityLog\Model\Actor\NameLookup\IntegrationNameLookup\Proxy</item>

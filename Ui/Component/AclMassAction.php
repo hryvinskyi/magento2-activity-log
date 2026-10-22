@@ -15,7 +15,13 @@ use Magento\Framework\View\Element\UiComponentInterface;
 use Magento\Ui\Component\MassAction;
 
 /**
- * Mass actions that leave out each action whose "aclResource" the admin user is not allowed
+ * Mass actions that leave out each action the admin user is not allowed
+ *
+ * An action names what it needs in its config: "aclResource", one resource, or "aclResources", a list of resources
+ * the admin must hold every one of (an action whose controller checks more than one). An action naming neither is
+ * kept. A listing of any module uses it as its massaction's class.
+ *
+ * @api
  */
 class AclMassAction extends MassAction
 {
@@ -40,12 +46,31 @@ class AclMassAction extends MassAction
     public function prepare()
     {
         foreach ($this->getChildComponents() as $name => $action) {
-            $resource = $action->getConfiguration()['aclResource'] ?? null;
-            if (is_string($resource) && $resource !== '' && !$this->authorization->isAllowed($resource)) {
+            if (!$this->isAllowed($action->getConfiguration())) {
                 unset($this->components[$name]);
             }
         }
 
         parent::prepare();
+    }
+
+    /**
+     * Whether the admin holds every resource an action's config names
+     *
+     * @param array<mixed> $config
+     * @return bool
+     */
+    private function isAllowed(array $config): bool
+    {
+        $resources = $config['aclResources'] ?? [];
+        $resources = is_array($resources) ? array_values($resources) : [];
+        $resources[] = $config['aclResource'] ?? null;
+        foreach ($resources as $resource) {
+            if (is_string($resource) && $resource !== '' && !$this->authorization->isAllowed($resource)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

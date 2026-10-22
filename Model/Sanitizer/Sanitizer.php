@@ -18,16 +18,25 @@ use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
  * Masks values under secret field names, in arrays and in JSON text, to any depth, and secrets in message bodies
  *
  * The secret names are the configured list plus a floor of names configuration cannot remove. Names on both sides
- * are compared normalised: lower case, hyphens and spaces read as underscores.
+ * are compared normalised: lower case, hyphens and spaces read as underscores. The configured list is asked for on
+ * every check, so a list changed and reloaded within the process (a setup patch merging names into it) is followed at
+ * once; it is normalised again only when it differs from the one read before.
  */
 class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
 {
     private const SCHEME_PATTERN = '/^(Bearer|Basic|Digest|OAuth|Token)\s+\S/i';
 
     /**
+     * The configured list the normalised names were made from; null before the first check
+     *
      * @var list<string>|null
      */
-    private ?array $secretFields = null;
+    private ?array $configuredFields = null;
+
+    /**
+     * @var list<string>
+     */
+    private array $secretFields = [];
 
     /**
      * @var list<BodyMaskerInterface>
@@ -197,27 +206,31 @@ class Sanitizer implements SanitizerInterface, ResetAfterRequestInterface
      */
     public function _resetState(): void
     {
-        $this->secretFields = null;
+        $this->configuredFields = null;
+        $this->secretFields = [];
     }
 
     /**
-     * Secret field names, normalised: the mandatory ones and the configured ones, read once per instance
+     * Secret field names, normalised: the mandatory ones and the configured ones as configured now
      *
      * @return list<string>
      */
     private function secretFields(): array
     {
-        if ($this->secretFields !== null) {
+        $configured = $this->config->getSecretFields();
+        if ($configured === $this->configuredFields) {
             return $this->secretFields;
         }
 
         $fields = [];
-        foreach (array_merge(array_values($this->mandatorySecretFields), $this->config->getSecretFields()) as $field) {
+        foreach (array_merge(array_values($this->mandatorySecretFields), $configured) as $field) {
             $field = $this->normalise($field);
             if ($field !== '') {
                 $fields[$field] = $field;
             }
         }
+
+        $this->configuredFields = $configured;
 
         return $this->secretFields = array_values($fields);
     }

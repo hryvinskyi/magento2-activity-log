@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `Api\ActorScopeInterface::actAs()`: work done on someone's behalf (a queue consumer carrying out an admin's mass
+  action) records its activities for that actor instead of the process. Scopes nest; each ends with its work.
+- `Api\UserActorsInterface::actorOf()`: the actor of a Magento account given by user type and id, named as the
+  session would name it. The user context resolver now goes through it.
+- An operation of a bulk action (an asynchronous web API call, a mass action the admin panel queues) is carried out
+  for the admin or integration that scheduled the bulk, not for `cli`.
+- `Ui\Component\AclMassAction` is `@api` and takes `aclResources`, a list of resources an admin must hold every
+  one of, beside `aclResource`.
+
+### Fixed
+- A secret field list changed within one process (a setup patch that merges names into it and reloads the
+  configuration) is followed at once; the sanitizer kept the list it read first for the life of the process.
+- `i18n/en_US.csv` holds every phrase the module shows (107 were missing).
+- The data contracts' docblocks no longer give examples from other modules.
+
 ## [1.1.1] - 2026-10-22
 
 ### Fixed

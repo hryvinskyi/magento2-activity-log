@@ -136,6 +136,31 @@ class SanitizerTest extends TestCase
         self::assertSame('password=hunter2', $this->sanitizer->sanitize('password=hunter2'));
     }
 
+    public function testAListChangedWithinTheProcessIsFollowedAtOnce(): void
+    {
+        $config = $this->createStub(ConfigInterface::class);
+        $config->method('getSecretFields')->willReturnOnConsecutiveCalls(['password'], ['password', 'x_signature']);
+        $sanitizer = new Sanitizer($config);
+
+        self::assertFalse($sanitizer->isSecretField('X-Signature'), 'The list before the change');
+        self::assertTrue(
+            $sanitizer->isSecretField('X-Signature'),
+            'A setup patch merges names into the list and reloads the configuration; the next check masks with it'
+        );
+    }
+
+    public function testConfigurationReloadedForTheNextRequestIsReadAgain(): void
+    {
+        $config = $this->createStub(ConfigInterface::class);
+        $config->method('getSecretFields')->willReturnOnConsecutiveCalls(['token'], ['token'], []);
+        $sanitizer = new Sanitizer($config);
+
+        self::assertTrue($sanitizer->isSecretField('access_token'));
+        self::assertTrue($sanitizer->isSecretField('access_token'));
+        $sanitizer->_resetState();
+        self::assertFalse($sanitizer->isSecretField('access_token'));
+    }
+
     public function testRejectsABodyMaskerOfTheWrongType(): void
     {
         $this->expectException(\InvalidArgumentException::class);

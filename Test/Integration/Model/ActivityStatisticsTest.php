@@ -34,38 +34,38 @@ class ActivityStatisticsTest extends TestCase
 
         $this->insert(
             'op-aaaaaaaa',
-            'mcp',
-            'execute_ability catalog.product_repository.save',
+            'assistant',
+            'ask catalog.product.save',
             'success',
             412.0,
             2,
             'jane.doe',
             'Desk Assistant'
         );
-        $this->insert('op-aaaaaaaa', 'entity', 'Product saved', 'success', null, 2, 'jane.doe', 'Desk Assistant');
-        $this->insert('op-bbbbbbbb', 'rest', 'POST /V1/products', 'failure', 642.0, 30, 'ERP Sync');
-        $this->insert('op-cccccccc', 'rest', 'GET /V1/orders', 'success', 40.0, 30, 'ERP Sync');
+        $this->insert('op-aaaaaaaa', 'catalog_sync', 'Product saved', 'success', null, 2, 'jane.doe', 'Desk Assistant');
+        $this->insert('op-bbbbbbbb', 'partner_api', 'POST /partner/products', 'failure', 642.0, 30, 'ERP Sync');
+        $this->insert('op-cccccccc', 'partner_api', 'GET /partner/orders', 'success', 40.0, 30, 'ERP Sync');
         $this->insert(
             'op-dddddddd',
-            'mcp',
-            'execute_ability catalog.product_repository.delete',
+            'assistant',
+            'ask catalog.product.delete',
             'denied',
             12.0,
             50,
             'jane.doe',
             'Desk Assistant'
         );
-        $this->insert('op-eeeeeeee', 'rest', 'GET /V1/orders', 'success', 60.0, 24 * 10, 'ERP Sync');
-        $this->insert('op-ffffffff', 'rest', 'GET /V1/orders', 'success', 60.0, 24 * 20, 'ERP Sync');
+        $this->insert('op-eeeeeeee', 'partner_api', 'GET /partner/orders', 'success', 60.0, 24 * 10, 'ERP Sync');
+        $this->insert('op-ffffffff', 'partner_api', 'GET /partner/orders', 'success', 60.0, 24 * 20, 'ERP Sync');
     }
 
     public function testTotalsCountTheRangeAndChannelsAsked(): void
     {
         $statistics = self::service(ActivityStatisticsInterface::class);
-        $sevenDays = new DashboardQuery(7, ['rest', 'mcp', 'entity'], self::NOW_MS);
+        $sevenDays = new DashboardQuery(7, ['partner_api', 'assistant', 'catalog_sync'], self::NOW_MS);
 
         $totals = $statistics->totals($sevenDays->getChannels(), $sevenDays->getFromMs(), $sevenDays->getToMs());
-        $restOnly = $statistics->totals(['rest'], $sevenDays->getFromMs(), $sevenDays->getToMs());
+        $partnerOnly = $statistics->totals(['partner_api'], $sevenDays->getFromMs(), $sevenDays->getToMs());
         $previous = $statistics->totals(
             $sevenDays->getChannels(),
             $sevenDays->getPreviousRange()['fromMs'],
@@ -76,33 +76,33 @@ class ActivityStatisticsTest extends TestCase
         self::assertSame(1, $totals['failures']);
         self::assertSame(1, $totals['denied']);
         self::assertEqualsWithDelta((412 + 642 + 40 + 12) / 4, $totals['avgDurationMs'] ?? 0.0, 0.01);
-        self::assertSame(2, $restOnly['total']);
+        self::assertSame(2, $partnerOnly['total']);
         self::assertSame(1, $previous['total'], 'Only the activity of ten days ago falls in the week before.');
     }
 
     public function testVolumeCoversEveryDayAndAddsUpToTheTotal(): void
     {
-        $query = new DashboardQuery(7, ['rest', 'mcp', 'entity'], self::NOW_MS);
+        $query = new DashboardQuery(7, ['partner_api', 'assistant', 'catalog_sync'], self::NOW_MS);
 
         $volume = self::service(ActivityStatisticsInterface::class)->volumeByDay($query);
 
         self::assertGreaterThanOrEqual(7, count($volume['days']));
         self::assertLessThanOrEqual(8, count($volume['days']));
-        self::assertSame(2, array_sum($volume['counts']['rest']));
-        self::assertSame(2, array_sum($volume['counts']['mcp']));
-        self::assertSame(1, array_sum($volume['counts']['entity']));
+        self::assertSame(2, array_sum($volume['counts']['partner_api']));
+        self::assertSame(2, array_sum($volume['counts']['assistant']));
+        self::assertSame(1, array_sum($volume['counts']['catalog_sync']));
     }
 
     public function testSlowestAndTopActorsRankByWhatTheySay(): void
     {
-        $query = new DashboardQuery(7, ['rest', 'mcp', 'entity'], self::NOW_MS);
+        $query = new DashboardQuery(7, ['partner_api', 'assistant', 'catalog_sync'], self::NOW_MS);
         $statistics = self::service(ActivityStatisticsInterface::class);
 
         $slowest = $statistics->slowestActions($query, 10);
         $actors = $statistics->topActors($query, 10);
         $denied = $statistics->topActions($query, 10, 'denied');
 
-        self::assertSame('POST /V1/products', $slowest[0]['action']);
+        self::assertSame('POST /partner/products', $slowest[0]['action']);
         self::assertNotContains(
             'Product saved',
             array_column($slowest, 'action'),
@@ -118,7 +118,7 @@ class ActivityStatisticsTest extends TestCase
             $actors[1]['count'],
             $actors[1]['failures'],
         ]);
-        self::assertSame(['execute_ability catalog.product_repository.delete'], array_column($denied, 'action'));
+        self::assertSame(['ask catalog.product.delete'], array_column($denied, 'action'));
     }
 
     public function testTheGridKnowsHowManyActivitiesShareEachOperationOfAPageItReads(): void
@@ -127,7 +127,7 @@ class ActivityStatisticsTest extends TestCase
             'mainTable' => ActivityResource::TABLE,
             'resourceModel' => ActivityResource::class,
         ]);
-        $collection->addFieldToFilter('channel', 'entity')->setPageSize(20);
+        $collection->addFieldToFilter('channel', 'catalog_sync')->setPageSize(20);
 
         $sizes = [];
         foreach ($collection->getItems() as $item) {

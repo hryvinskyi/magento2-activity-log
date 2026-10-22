@@ -10,6 +10,7 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Hryvinskyi_ActivityLog">
         <sequence>
+            <module name="Magento_AsynchronousOperations"/>
             <module name="Magento_Authorization"/>
             <module name="Magento_Backend"/>
             <module name="Magento_Config"/>
