@@ -25,12 +25,14 @@ class ProcessActorResolver implements ActorResolverInterface
     /**
      * @param State $appState
      * @param ActorInterfaceFactory $actorFactory
-     * @param string $sapi
+     * @param string|null $sapi The server API's name; when not given, the running process's own, read when asked.
+     *     It is never a default value of its own: production's compiled configuration keeps a default as the
+     *     command line that compiled it saw it, so every web request would read as "cli".
      */
     public function __construct(
         private readonly State $appState,
         private readonly ActorInterfaceFactory $actorFactory,
-        private readonly string $sapi = PHP_SAPI
+        private readonly ?string $sapi = null
     ) {
     }
 
@@ -43,7 +45,7 @@ class ProcessActorResolver implements ActorResolverInterface
             return $this->actorFactory->create(['type' => ActorType::Cron, 'name' => 'cron']);
         }
 
-        if ($this->sapi === 'cli') {
+        if (($this->sapi ?? PHP_SAPI) === 'cli') {
             return $this->actorFactory->create(['type' => ActorType::Cli, 'name' => 'cli']);
         }
 

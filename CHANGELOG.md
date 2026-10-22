@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-10-22
+
+### Fixed
+- In production mode every activity of a process nobody logged in to was recorded with the actor `cli`:
+  a payment provider's webhook, a guest's action, an anonymous REST call. The server API was a constructor
+  default, and `setup:di:compile` keeps defaults in the compiled configuration as the command line that
+  compiled it saw them. It is now read when an actor is resolved, so such activities are `anonymous` again.
+  Activities already recorded keep their actor.
+
 ## [1.1.0] - 2026-10-22
 
 ### Added
