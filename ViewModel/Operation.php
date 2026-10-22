@@ -24,7 +24,7 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
  */
 class Operation implements ArgumentInterface
 {
-    public const URL_PATH_VIEW = 'activitylog/activity/view';
+    public const URL_PATH_VIEW = 'hryvinskyi_activitylog/activity/view';
 
     /**
      * @var list<ActivityInterface>|null

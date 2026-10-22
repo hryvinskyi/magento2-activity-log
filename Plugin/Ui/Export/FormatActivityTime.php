@@ -10,11 +10,14 @@ declare(strict_types=1);
 namespace Hryvinskyi\ActivityLog\Plugin\Ui\Export;
 
 use Hryvinskyi\ActivityLog\Model\Presentation\TimeFormatter;
+use Hryvinskyi\ActivityLog\Model\ResourceModel\Activity\Grid\ActivityDocument;
 use Magento\Framework\Api\Search\DocumentInterface;
 use Magento\Ui\Model\Export\MetadataProvider;
 
 /**
  * The activity grid stores time as milliseconds; an exported file shows it as a date in the store timezone
+ *
+ * Applies to the activity grid's rows only: another grid may have a column of the same name.
  */
 class FormatActivityTime
 {
@@ -43,7 +46,9 @@ class FormatActivityTime
         $fields,
         $options
     ): array {
-        $value = in_array(self::FIELD, $fields, true) ? $document->getCustomAttribute(self::FIELD)?->getValue() : null;
+        $value = $document instanceof ActivityDocument && in_array(self::FIELD, $fields, true)
+            ? $document->getCustomAttribute(self::FIELD)?->getValue()
+            : null;
         if (is_numeric($value)) {
             $document->setCustomAttribute(self::FIELD, $this->timeFormatter->dateTime((int) $value));
         }

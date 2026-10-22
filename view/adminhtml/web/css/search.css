@@ -1,0 +1,779 @@
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+/* The activity search page: header, search bar, range popover, filters panel, view switches */
+.activity-search {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 40px;
+    color: #303030;
+    font-size: 14px;
+    line-height: 1.36;
+}
+
+.activity-search [hidden] {
+    display: none !important;
+}
+
+.activity-search__header {
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.activity-search__mono {
+    font-family: Menlo, Consolas, monospace;
+}
+
+.activity-search__muted {
+    color: #6b6b6b;
+}
+
+/* Row of the bar, the range button and the Filters button */
+.activity-search__controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.activity-search__bar {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-search__field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    min-height: 40px;
+    padding: 4px 92px 4px 12px;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+    background: #fff;
+    cursor: text;
+}
+
+.activity-search__field:focus-within {
+    border-color: #007bdb;
+    box-shadow: 0 0 0 1px #007bdb;
+}
+
+.activity-search__field-icon {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    color: #514943;
+}
+
+.activity-search__chips {
+    display: contents;
+}
+
+.activity-search__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-sizing: border-box;
+    max-width: 360px;
+    height: 26px;
+    padding: 0 4px 0 8px;
+    border: 1px solid #e2b9d1;
+    border-radius: 3px;
+    background: #f4dfeb;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.activity-search__chip--text {
+    border-color: #e3e3e3;
+    background: #f3f3f3;
+}
+
+.activity-search__chip-key {
+    color: #7e2459;
+    font-weight: 600;
+}
+
+.activity-search__chip-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-search__chip-remove {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: none;
+    color: #514943;
+    cursor: pointer;
+}
+
+.activity-search__chip-remove:hover {
+    background: rgba(0, 0, 0, .08);
+    color: #303030;
+}
+
+.activity-search__chip-remove:focus-visible {
+    outline: 2px solid #007bdb;
+}
+
+.activity-search__chip-remove-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.activity-search__field .activity-search__input,
+.activity-search__field .activity-search__input:focus {
+    flex: 1;
+    min-width: 180px;
+    height: 30px;
+    padding: 0 4px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    color: #303030;
+    font-size: 14px;
+}
+
+.activity-search__clear {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    height: 26px;
+    padding: 0 8px;
+    border: 0;
+    background: none;
+    color: #007bdb;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.activity-search__clear:hover {
+    text-decoration: underline;
+}
+
+/* The list of offers, an ARIA listbox */
+.activity-search__popup {
+    position: absolute;
+    top: 44px;
+    right: 0;
+    left: 0;
+    /* above the grid's own controls (sticky header, select-all, sticky toolbar), below the admin header and menu */
+    z-index: 450;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+    font-size: 13px;
+}
+
+.activity-search__listbox {
+    max-height: 380px;
+    overflow: auto;
+}
+
+.activity-search__group-title {
+    padding: 10px 14px 4px;
+    color: #6b6b6b;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.activity-search__option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    cursor: pointer;
+}
+
+.activity-search__option[aria-selected="true"] {
+    background: #e5f7fe;
+}
+
+.activity-search__option-key {
+    flex: none;
+    min-width: 58px;
+    color: #7e2459;
+    font-family: Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.activity-search__option-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-search__option-hint {
+    color: #6b6b6b;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.activity-search__keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    padding: 8px 14px;
+    border-top: 1px solid #e3e3e3;
+    background: #f8f8f8;
+    color: #6b6b6b;
+    font-size: 11.5px;
+}
+
+.activity-search__keys kbd {
+    padding: 0 4px;
+    border: 1px solid #c9c9c9;
+    border-radius: 3px;
+    background: #fff;
+    font-family: inherit;
+}
+
+.activity-search__message {
+    margin-top: 6px;
+    color: #e22626;
+    font-size: 12.5px;
+}
+
+/* The range button and its popover */
+.activity-search__range {
+    position: relative;
+    flex: none;
+}
+
+.activity-search__range-button,
+.activity-search__filters-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+    background: #fff;
+    color: #303030;
+    font-family: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.activity-search__filters-button {
+    flex: none;
+    font-weight: 600;
+}
+
+.activity-search__range-button:hover,
+.activity-search__filters-button:hover,
+.activity-search__range-button:focus,
+.activity-search__filters-button:focus,
+.activity-search__range-button:active,
+.activity-search__filters-button:active {
+    border-color: #8c8c8c;
+    background: #fff;
+    box-shadow: none;
+    color: #303030;
+}
+
+.activity-search__range-button:focus-visible,
+.activity-search__filters-button:focus-visible,
+.activity-search__view:focus-visible,
+.activity-search__example:focus-visible {
+    outline: 2px solid #007bdb;
+    outline-offset: 2px;
+}
+
+.activity-search__range-button--open,
+.activity-search__range-button--open:hover,
+.activity-search__range-button--open:focus {
+    border-color: #007bdb;
+}
+
+.activity-search__filters-button--open,
+.activity-search__filters-button--open:hover,
+.activity-search__filters-button--open:focus {
+    background: #f3f3f3;
+}
+
+.activity-search__button-icon {
+    flex: none;
+    width: 15px;
+    height: 15px;
+    color: #514943;
+}
+
+.activity-search__range-detail {
+    color: #6b6b6b;
+}
+
+.activity-search__chevron {
+    flex: none;
+    width: 14px;
+    height: 14px;
+}
+
+.activity-range {
+    position: absolute;
+    top: 46px;
+    right: 0;
+    /* above the grid's own controls (sticky header, select-all, sticky toolbar), below the admin header and menu */
+    z-index: 450;
+    display: flex;
+    width: 640px;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+    font-size: 13px;
+}
+
+.activity-range__presets {
+    flex: none;
+    width: 168px;
+    padding: 8px 0;
+    border-right: 1px solid #e3e3e3;
+    background: #f8f8f8;
+}
+
+.activity-range__preset {
+    display: block;
+    width: 100%;
+    padding: 8px 16px 8px 13px;
+    border: 0;
+    border-left: 3px solid transparent;
+    background: transparent;
+    color: #303030;
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.activity-range__preset:hover {
+    background: #e5f7fe;
+}
+
+.activity-range__preset:focus-visible {
+    outline: 2px solid #007bdb;
+    outline-offset: -2px;
+}
+
+.activity-range__preset[aria-pressed="true"] {
+    border-left-color: #eb5202;
+    background: #fff;
+    font-weight: 600;
+}
+
+.activity-range__preset-detail {
+    display: block;
+    color: #6b6b6b;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.activity-range__pane {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 16px 18px 14px;
+}
+
+.activity-range__inputs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+}
+
+.activity-range__end-label {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.activity-range__end-inputs {
+    display: flex;
+    gap: 6px;
+}
+
+.activity-range .activity-range__date,
+.activity-range .activity-range__time {
+    box-sizing: border-box;
+    height: 33px;
+    padding: 0 6px;
+    border: 1px solid #adadad;
+    border-radius: 1px;
+    color: #303030;
+    font-size: 13px;
+}
+
+.activity-range .activity-range__date {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-range .activity-range__time {
+    flex: none;
+    width: 84px;
+}
+
+.activity-range .activity-range__date:focus,
+.activity-range .activity-range__time:focus {
+    border-color: #007bdb;
+    outline: none;
+    box-shadow: 0 0 0 1px #007bdb;
+}
+
+.activity-range__month {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.activity-range__month-label {
+    font-weight: 600;
+}
+
+.activity-range__nav {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    background: #fff;
+    color: #514943;
+    cursor: pointer;
+}
+
+.activity-range__nav:disabled {
+    color: #c9c9c9;
+    cursor: default;
+}
+
+.activity-range__weekdays,
+.activity-range__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.activity-range__weekdays {
+    margin-bottom: 2px;
+    color: #6b6b6b;
+    font-size: 11px;
+    text-align: center;
+}
+
+.activity-range__day {
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: #303030;
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.activity-range__day:hover {
+    background: #e5f7fe;
+}
+
+.activity-range__day:focus-visible {
+    outline: 2px solid #007bdb;
+    outline-offset: -2px;
+}
+
+.activity-range__day--outside {
+    color: #adadad;
+}
+
+.activity-range__day--today {
+    font-weight: 700;
+}
+
+.activity-range__day--between {
+    background: #e5f7fe;
+}
+
+.activity-range__day--edge,
+.activity-range__day--edge:hover {
+    background: #514943;
+    color: #fff;
+    font-weight: 700;
+}
+
+.activity-range__day:disabled {
+    background: transparent;
+    color: #c9c9c9;
+    cursor: default;
+}
+
+.activity-range__hint {
+    margin-top: 6px;
+    color: #6b6b6b;
+    font-size: 11.5px;
+}
+
+.activity-range__error,
+.activity-search__panel-error {
+    color: #e22626;
+    font-size: 12.5px;
+}
+
+.activity-range__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e3e3e3;
+}
+
+.activity-range__zone {
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+.activity-range__actions,
+.activity-search__panel-actions {
+    display: flex;
+    flex: none;
+    gap: 10px;
+}
+
+/* Small buttons of the popover and the panel */
+.activity-search__primary,
+.activity-search__secondary,
+.activity-search__link-button {
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+    background: #fff;
+    color: #514943;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.activity-search__primary {
+    padding: 0 14px;
+    border-color: #eb5202;
+    background: #eb5202;
+    box-shadow: 0 1px 2px rgba(235, 82, 2, .35);
+    color: #fff;
+}
+
+.activity-search__primary:hover {
+    border-color: #ba4000;
+    background: #ba4000;
+}
+
+.activity-search__link-button {
+    border: 0;
+    background: none;
+    color: #007bdb;
+}
+
+.activity-search__panel .activity-search__primary,
+.activity-search__panel .activity-search__link-button {
+    height: 33px;
+}
+
+/* Examples, summary, "Changes only" and the view switch */
+.activity-search__options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 28px;
+}
+
+.activity-search__hints,
+.activity-search__examples {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: #6b6b6b;
+    font-size: 12.5px;
+}
+
+.activity-search__example {
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid #e3e3e3;
+    border-radius: 13px;
+    background: #f8f8f8;
+    color: #303030;
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.activity-search__example:hover {
+    border-color: #adadad;
+    background: #fff;
+}
+
+.activity-search__switches {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+}
+
+.activity-search__changes {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: #303030;
+    font-size: 12.5px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.activity-search__changes input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #514943;
+}
+
+.activity-search__views {
+    display: inline-flex;
+    overflow: hidden;
+    border: 1px solid #adadad;
+    border-radius: 3px;
+}
+
+.activity-search__view {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 0;
+    background: #fff;
+    color: #514943;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.activity-search__view + .activity-search__view {
+    border-left: 1px solid #adadad;
+}
+
+.activity-search__view:hover,
+.activity-search__view:focus,
+.activity-search__view:active {
+    background: #fff;
+    box-shadow: none;
+    color: #514943;
+}
+
+.activity-search__view[aria-pressed="true"] {
+    background: #514943;
+    color: #fff;
+}
+
+.activity-search__view-icon {
+    width: 13px;
+    height: 13px;
+}
+
+/* The filters panel */
+.activity-search__panel {
+    padding: 18px 22px 16px;
+    border: 1px solid #d6d6d6;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.activity-search__panel-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px 22px;
+}
+
+.activity-search__panel-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.activity-search__panel-field select,
+.activity-search__panel-field input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 33px;
+    padding: 0 10px;
+    border: 1px solid #adadad;
+    border-radius: 1px;
+    background: #fff;
+    color: #303030;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.activity-search__panel-field select {
+    padding: 0 28px 0 8px;
+    /* the admin theme removes the native arrow from every select, so the chevron is drawn here */
+    -webkit-appearance: none;
+    appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23514943' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center / 12px 12px;
+}
+
+.activity-search__panel-field select:focus,
+.activity-search__panel-field input:focus {
+    border-color: #007bdb;
+    outline: none;
+    box-shadow: 0 0 0 1px #007bdb;
+}
+
+.activity-search__panel-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+    font-size: 12px;
+}
+
+/* Results: the timeline view, or the grid */
+.activity-search__results {
+    min-width: 0;
+}

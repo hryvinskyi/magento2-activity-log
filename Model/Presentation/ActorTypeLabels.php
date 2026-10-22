@@ -26,13 +26,13 @@ class ActorTypeLabels
     public function label(ActorType $type): Phrase
     {
         return match ($type) {
-            ActorType::Admin => __('admin'),
-            ActorType::Integration => __('integration'),
-            ActorType::Customer => __('customer'),
-            ActorType::Guest => __('guest'),
-            ActorType::Cli => __('command line'),
-            ActorType::Cron => __('cron'),
-            ActorType::Anonymous => __('anonymous'),
+            ActorType::Admin => __('Admin'),
+            ActorType::Integration => __('Integration'),
+            ActorType::Customer => __('Customer'),
+            ActorType::Guest => __('Guest'),
+            ActorType::Cli => __('CLI'),
+            ActorType::Cron => __('Cron'),
+            ActorType::Anonymous => __('Anonymous'),
         };
     }
 }

@@ -1,0 +1,257 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\Api\IconsInterface;
+use Hryvinskyi\ActivityLog\ViewModel\SearchPage;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/**
+ * The activity search page
+ *
+ * The results area (data-role "search-results") holds the two views of one search: "timeline-view", empty until a
+ * timeline is mounted there, and "grid-view", the activity grid (the child "activity.grid"). The page announces every
+ * search on the results element; whatever shows results listens there.
+ *
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$page = $block->getData('page');
+if (!$page instanceof SearchPage) {
+    return;
+}
+$icons = $block->getData('icons');
+$icon = static fn (string $id, string $class): string => $icons instanceof IconsInterface
+    ? $icons->render($id, $class)
+    : '';
+$opensGrid = $page->opensGrid();
+?>
+<div class="activity-search" id="activity-search"
+     data-mage-init='{"Hryvinskyi_ActivityLog/js/search-page/page": {}}'>
+    <script type="application/json" data-role="search-config">
+        <?= /* @noEscape */ $page->scriptConfigJson() ?>
+    </script>
+
+    <div class="activity-page-header activity-search__header">
+        <h1 class="activity-heading"><?= $escaper->escapeHtml(__('Activity')) ?></h1>
+        <div class="activity-page-header__actions">
+            <?= $block->getChildHtml('activity.search.actions') ?>
+            <a class="activity-button" href="<?= $escaper->escapeUrl($page->dashboardUrl()) ?>">
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::layout-dashboard', 'activity-button__icon') ?>
+                <?= $escaper->escapeHtml(__('Dashboard')) ?>
+            </a>
+            <button type="button" class="activity-button" data-role="export">
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::download', 'activity-button__icon') ?>
+                <?= $escaper->escapeHtml(__('Export CSV')) ?>
+            </button>
+        </div>
+    </div>
+
+    <div class="activity-search__controls">
+        <div class="activity-search__bar" data-role="bar">
+            <div class="activity-search__field" data-role="field">
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::search', 'activity-search__field-icon') ?>
+                <span class="activity-search__chips" data-role="chips"></span>
+                <input type="text" class="activity-search__input" data-role="input"
+                       role="combobox" aria-expanded="false" aria-autocomplete="list"
+                       aria-controls="activity-search-listbox" autocomplete="off" spellcheck="false"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Search activities')) ?>"
+                       placeholder="<?= $escaper->escapeHtmlAttr($page->placeholder()) ?>">
+            </div>
+            <button type="button" class="activity-search__clear" data-role="clear" hidden>
+                <?= $escaper->escapeHtml(__('Clear')) ?>
+            </button>
+            <div class="activity-search__popup" data-role="popup" hidden>
+                <div class="activity-search__listbox" id="activity-search-listbox" role="listbox"
+                     data-role="listbox" aria-label="<?= $escaper->escapeHtmlAttr(__('Filters to add')) ?>"></div>
+                <div class="activity-search__keys">
+                    <span><kbd>↑</kbd> <kbd>↓</kbd> <?= $escaper->escapeHtml(__('move')) ?></span>
+                    <span><kbd><?= $escaper->escapeHtml(__('Enter')) ?></kbd>
+                        <?= $escaper->escapeHtml(__('add filter')) ?></span>
+                    <span><kbd>⌫</kbd> <?= $escaper->escapeHtml(__('on empty input removes the last filter')) ?></span>
+                    <span><kbd><?= $escaper->escapeHtml(__('Esc')) ?></kbd>
+                        <?= $escaper->escapeHtml(__('close')) ?></span>
+                </div>
+            </div>
+            <div class="activity-search__message" data-role="message" role="status" hidden></div>
+            <template data-role="icon-remove">
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::x', 'activity-search__chip-remove-icon') ?>
+            </template>
+        </div>
+
+        <div class="activity-search__range" data-role="range">
+            <button type="button" class="activity-search__range-button" data-role="range-toggle"
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="activity-search-range">
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::clock', 'activity-search__button-icon') ?>
+                <strong data-role="range-label"></strong>
+                <span class="activity-search__range-detail" data-role="range-detail"></span>
+                <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::chevron-down', 'activity-search__chevron') ?>
+            </button>
+            <div class="activity-range" id="activity-search-range" role="dialog" data-role="range-popover"
+                 aria-label="<?= $escaper->escapeHtmlAttr(__('Date and time range')) ?>" hidden>
+                <div class="activity-range__presets">
+                    <?php foreach ($page->presets() as $preset): ?>
+                        <button type="button" class="activity-range__preset" data-role="preset"
+                                data-preset="<?= $escaper->escapeHtmlAttr($preset['code']) ?>" aria-pressed="false">
+                            <?= $escaper->escapeHtml($preset['label']) ?>
+                            <span class="activity-range__preset-detail" data-role="preset-detail"></span>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+                <div class="activity-range__pane">
+                    <div class="activity-range__inputs">
+                        <?php foreach (['from' => __('From'), 'to' => __('To')] as $end => $endLabel): ?>
+                            <div class="activity-range__end">
+                                <div class="activity-range__end-label"><?= $escaper->escapeHtml($endLabel) ?></div>
+                                <div class="activity-range__end-inputs">
+                                    <input type="date" class="activity-range__date"
+                                           data-input="<?= $escaper->escapeHtmlAttr($end) ?>Date"
+                                           aria-label="<?= $escaper->escapeHtmlAttr(__('%1 date', $endLabel)) ?>">
+                                    <input type="time" class="activity-range__time"
+                                           data-input="<?= $escaper->escapeHtmlAttr($end) ?>Time"
+                                           aria-label="<?= $escaper->escapeHtmlAttr(__('%1 time', $endLabel)) ?>">
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="activity-range__calendar">
+                        <div class="activity-range__month">
+                            <button type="button" class="activity-range__nav" data-role="month-prev"
+                                    aria-label="<?= $escaper->escapeHtmlAttr(__('Previous month')) ?>">‹</button>
+                            <span class="activity-range__month-label" data-role="month-label"></span>
+                            <button type="button" class="activity-range__nav" data-role="month-next"
+                                    aria-label="<?= $escaper->escapeHtmlAttr(__('Next month')) ?>">›</button>
+                        </div>
+                        <div class="activity-range__weekdays" data-role="weekdays"></div>
+                        <div class="activity-range__days" data-role="days"></div>
+                        <div class="activity-range__hint" data-role="calendar-hint"></div>
+                    </div>
+                    <div class="activity-range__error" data-role="range-error" role="alert" hidden></div>
+                    <div class="activity-range__footer">
+                        <span class="activity-range__zone">
+                            <?= $escaper->escapeHtml(__('Store timezone %1 · minute precision', $page->timeZone())) ?>
+                        </span>
+                        <span class="activity-range__actions">
+                            <button type="button" class="activity-search__secondary" data-role="range-cancel">
+                                <?= $escaper->escapeHtml(__('Cancel')) ?>
+                            </button>
+                            <button type="button" class="activity-search__primary" data-role="range-apply">
+                                <?= $escaper->escapeHtml(__('Apply')) ?>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="activity-search__filters-button" data-role="filters-toggle"
+                aria-expanded="false" aria-controls="activity-search-filters">
+            <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::filter', 'activity-search__button-icon') ?>
+            <?= $escaper->escapeHtml(__('Filters')) ?>
+        </button>
+    </div>
+
+    <div class="activity-search__options">
+        <div class="activity-search__hints">
+            <?php if ($page->examples() !== []): ?>
+                <span class="activity-search__examples" data-role="examples">
+                    <span><?= $escaper->escapeHtml(__('Try:')) ?></span>
+                    <?php foreach ($page->examples() as $index => $example): ?>
+                        <button type="button" class="activity-search__example" data-example="<?= (int) $index ?>">
+                            <?= $escaper->escapeHtml($example['title']) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </span>
+            <?php endif; ?>
+            <span class="activity-search__summary" data-role="summary" aria-live="polite"></span>
+        </div>
+        <div class="activity-search__switches">
+            <?php if ($page->offersChangesOnly()): ?>
+                <label class="activity-search__changes">
+                    <input type="checkbox" data-role="changes-only" <?= $page->changesOnly() ? 'checked' : '' ?>>
+                    <?= $escaper->escapeHtml(__('Changes only')) ?>
+                    <span class="activity-search__muted">
+                        <?= $escaper->escapeHtml(__('(hide requests without a diff)')) ?>
+                    </span>
+                </label>
+            <?php endif; ?>
+            <div class="activity-search__views" role="group" aria-label="<?= $escaper->escapeHtmlAttr(__('View')) ?>">
+                <button type="button" class="activity-search__view" data-role="view" data-view="timeline"
+                        aria-pressed="<?= $opensGrid ? 'false' : 'true' ?>">
+                    <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::list', 'activity-search__view-icon') ?>
+                    <?= $escaper->escapeHtml(__('Timeline')) ?>
+                </button>
+                <button type="button" class="activity-search__view" data-role="view" data-view="grid"
+                        aria-pressed="<?= $opensGrid ? 'true' : 'false' ?>">
+                    <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::table', 'activity-search__view-icon') ?>
+                    <?= $escaper->escapeHtml(__('Grid')) ?>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-search__panel" id="activity-search-filters" data-role="filters-panel" hidden>
+        <div class="activity-search__panel-grid">
+            <?php foreach ($page->filterControls() as $control): ?>
+                <label class="activity-search__panel-field">
+                    <span><?= $escaper->escapeHtml($control['label']) ?></span>
+                    <?php if ($control['select']): ?>
+                        <select data-filter-key="<?= $escaper->escapeHtmlAttr($control['key']) ?>"
+                                title="<?= $escaper->escapeHtmlAttr($control['hint']) ?>">
+                            <option value=""><?= $escaper->escapeHtml(__('Any')) ?></option>
+                            <?php foreach ($control['options'] as $option): ?>
+                                <?php $value = $escaper->escapeHtmlAttr($option['value']); ?>
+                                <?php $target = $option['target'] === ''
+                                    ? ''
+                                    : ' data-target="' . $escaper->escapeHtmlAttr($option['target']) . '"'; ?>
+                                <option value="<?= /* @noEscape */ $value ?>"<?= /* @noEscape */ $target ?>>
+                                    <?= $escaper->escapeHtml($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php else: ?>
+                        <input type="text" data-filter-key="<?= $escaper->escapeHtmlAttr($control['key']) ?>"
+                               placeholder="<?= $escaper->escapeHtmlAttr($control['hint']) ?>">
+                    <?php endif; ?>
+                </label>
+                <?php if ($control['companion'] !== null): ?>
+                    <label class="activity-search__panel-field">
+                        <span><?= $escaper->escapeHtml($control['companion']['label']) ?></span>
+                        <input type="text" data-companion-of="<?= $escaper->escapeHtmlAttr($control['key']) ?>"
+                               placeholder="<?= $escaper->escapeHtmlAttr($control['companion']['hint']) ?>">
+                    </label>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+        <div class="activity-search__panel-footer">
+            <span class="activity-search__muted">
+                <?= $escaper->escapeHtml(
+                    __('Applying adds the values as filter chips in the search bar; the two stay in sync.')
+                ) ?>
+            </span>
+            <span class="activity-search__panel-error" data-role="panel-error" role="alert" hidden></span>
+            <span class="activity-search__panel-actions">
+                <button type="button" class="activity-search__link-button" data-role="panel-cancel">
+                    <?= $escaper->escapeHtml(__('Cancel')) ?>
+                </button>
+                <button type="button" class="activity-search__primary" data-role="panel-apply">
+                    <?= $escaper->escapeHtml(__('Apply Filters')) ?>
+                </button>
+            </span>
+        </div>
+    </div>
+
+    <div class="activity-search__results" data-role="search-results">
+        <div class="activity-search__timeline" data-role="timeline-view"<?= $opensGrid ? ' hidden' : '' ?>></div>
+        <div class="activity-search__grid" data-role="grid-view"<?= $opensGrid ? '' : ' hidden' ?>>
+            <?= $block->getChildHtml('activity.grid') ?>
+        </div>
+    </div>
+</div>

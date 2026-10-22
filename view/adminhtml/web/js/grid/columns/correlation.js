@@ -6,7 +6,7 @@
 
 /**
  * The first six characters of the correlation id; clicking copies the whole id. "×N" shows how many activities
- * share it and filters the grid to them.
+ * share it and asks the search for that request alone, as the timeline's request chip does.
  */
 define([
     'Hryvinskyi_ActivityLog/js/grid/columns/activity-column'
@@ -80,9 +80,11 @@ define([
 
         /**
          * @param {Object} row
+         * @param {Object} context The row as the click binding passes it
+         * @param {Event} event
          */
-        showOperation: function (row) {
-            this.filterBy({correlation_id: row.correlation_id});
+        showOperation: function (row, context, event) {
+            this.addCriterion(event, 'request', row.correlation_id, true);
         }
     });
 });

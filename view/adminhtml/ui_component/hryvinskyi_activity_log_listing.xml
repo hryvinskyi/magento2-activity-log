@@ -19,7 +19,7 @@
             <dep>hryvinskyi_activity_log_listing.hryvinskyi_activity_log_listing_data_source</dep>
         </deps>
     </settings>
-    <dataSource name="hryvinskyi_activity_log_listing_data_source" component="Magento_Ui/js/grid/provider">
+    <dataSource name="hryvinskyi_activity_log_listing_data_source" component="Hryvinskyi_ActivityLog/js/grid/provider">
         <settings>
             <storageConfig>
                 <param name="indexField" xsi:type="string">entity_id</param>
@@ -27,7 +27,7 @@
             <updateUrl path="mui/index/render"/>
         </settings>
         <aclResource>Hryvinskyi_ActivityLog::view</aclResource>
-        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+        <dataProvider class="Hryvinskyi\ActivityLog\Ui\DataProvider\ActivityListingDataProvider"
                       name="hryvinskyi_activity_log_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
@@ -40,7 +40,6 @@
             <sticky>true</sticky>
         </settings>
         <bookmark name="bookmarks"/>
-        <filterSearch name="fulltext"/>
         <exportButton name="export_button">
             <settings>
                 <options>
@@ -53,7 +52,6 @@
             </settings>
         </exportButton>
         <columnsControls name="columns_controls"/>
-        <filters name="listing_filters"/>
         <massaction name="listing_massaction" class="Hryvinskyi\ActivityLog\Ui\Component\AclMassAction">
             <action name="delete">
                 <argument name="data" xsi:type="array">
@@ -66,24 +64,15 @@
                         <message translate="true">Selected activities will be removed from the journal permanently. Linked activities in the same operation are kept.</message>
                         <title translate="true">Delete activities?</title>
                     </confirm>
-                    <url path="activitylog/activity/massDelete"/>
+                    <url path="hryvinskyi_activitylog/activity/massDelete"/>
                     <type>delete</type>
                     <label translate="true">Delete</label>
                 </settings>
             </action>
         </massaction>
-        <paging name="listing_paging"/>
+        <paging name="listing_paging" component="Hryvinskyi_ActivityLog/js/grid/paging"/>
     </listingToolbar>
     <columns name="hryvinskyi_activity_log_columns" component="Hryvinskyi_ActivityLog/js/grid/listing">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="urlFilterFields" xsi:type="array">
-                    <item name="correlation_id" xsi:type="string">correlation_id</item>
-                    <item name="actor_name" xsi:type="string">actor_name</item>
-                    <item name="channel" xsi:type="string">channel</item>
-                </item>
-            </item>
-        </argument>
         <column name="operation" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn"
                 component="Hryvinskyi_ActivityLog/js/grid/columns/operation-rule" sortOrder="1">
             <settings>
@@ -96,7 +85,7 @@
                 </fieldClass>
             </settings>
         </column>
-        <selectionsColumn name="ids" sortOrder="5">
+        <selectionsColumn name="ids" component="Hryvinskyi_ActivityLog/js/grid/columns/selections" sortOrder="5">
             <settings>
                 <indexField>entity_id</indexField>
             </settings>
@@ -108,20 +97,10 @@
                 <controlVisibility>false</controlVisibility>
             </settings>
         </column>
-        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date" sortOrder="11">
-            <settings>
-                <label translate="true">Date</label>
-                <filter>dateRange</filter>
-                <dataType>date</dataType>
-                <visible>false</visible>
-                <sortable>false</sortable>
-            </settings>
-        </column>
         <column name="channel" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn"
                 component="Hryvinskyi_ActivityLog/js/grid/columns/channel" sortOrder="20">
             <settings>
                 <label translate="true">Channel</label>
-                <filter>select</filter>
                 <options class="Hryvinskyi\ActivityLog\Model\Source\ChannelOptions"/>
                 <dataType>select</dataType>
             </settings>
@@ -129,35 +108,50 @@
         <column name="actor_name" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn" component="Hryvinskyi_ActivityLog/js/grid/columns/actor" sortOrder="30">
             <settings>
                 <label translate="true">Actor</label>
-                <filter>text</filter>
             </settings>
         </column>
         <column name="action" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn" component="Hryvinskyi_ActivityLog/js/grid/columns/action" sortOrder="40">
             <settings>
                 <label translate="true">Action</label>
-                <filter>text</filter>
             </settings>
         </column>
         <column name="subject_label" sortOrder="50">
             <settings>
                 <label translate="true">Subject</label>
-                <filter>text</filter>
                 <fieldClass>
                     <class name="activity-log-subject-cell">true</class>
                 </fieldClass>
             </settings>
         </column>
+        <column name="change_field" component="Hryvinskyi_ActivityLog/js/grid/columns/change-field" sortOrder="52">
+            <settings>
+                <label translate="true">Field</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="change_values" component="Hryvinskyi_ActivityLog/js/grid/columns/change-values" sortOrder="54">
+            <settings>
+                <label translate="true">Before → After</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
         <column name="outcome" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn" component="Hryvinskyi_ActivityLog/js/grid/columns/outcome" sortOrder="60">
             <settings>
                 <label translate="true">Outcome</label>
-                <filter>select</filter>
                 <options class="Hryvinskyi\ActivityLog\Model\Source\OutcomeOptions"/>
                 <dataType>select</dataType>
+            </settings>
+        </column>
+        <column name="change_scope" sortOrder="65">
+            <settings>
+                <label translate="true">Scope</label>
+                <sortable>false</sortable>
             </settings>
         </column>
         <column name="duration_ms" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn" component="Hryvinskyi_ActivityLog/js/grid/columns/duration" sortOrder="70">
             <settings>
                 <label translate="true">Duration</label>
+                <visible>false</visible>
                 <fieldClass>
                     <class name="activity-log-number-cell">true</class>
                 </fieldClass>
@@ -166,8 +160,8 @@
         <column name="store_id" component="Magento_Ui/js/grid/columns/select" sortOrder="80">
             <settings>
                 <label translate="true">Store View</label>
+                <visible>false</visible>
                 <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
-                <filter>select</filter>
                 <dataType>select</dataType>
                 <sortable>false</sortable>
             </settings>
@@ -175,13 +169,12 @@
         <column name="ip" sortOrder="90">
             <settings>
                 <label translate="true">IP</label>
-                <filter>text</filter>
+                <visible>false</visible>
             </settings>
         </column>
         <column name="user_agent" sortOrder="100">
             <settings>
                 <label translate="true">User Agent</label>
-                <filter>text</filter>
                 <visible>false</visible>
                 <fieldClass>
                     <class name="activity-log-user-agent-cell">true</class>
@@ -191,7 +184,6 @@
         <column name="correlation_id" class="Hryvinskyi\ActivityLog\Ui\Component\Listing\Column\ActivityColumn" component="Hryvinskyi_ActivityLog/js/grid/columns/correlation" sortOrder="110">
             <settings>
                 <label translate="true">Correlation ID</label>
-                <filter>text</filter>
                 <sortable>false</sortable>
             </settings>
         </column>

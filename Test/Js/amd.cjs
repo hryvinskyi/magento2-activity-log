@@ -42,6 +42,8 @@ function load(id) {
             }));
         },
         URLSearchParams,
+        AbortController,
+        CustomEvent,
         Object,
         Array,
         Number,

@@ -16,7 +16,7 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 
 /**
- * The activity grid
+ * The activity search page: the timeline and the grid of one search
  */
 class Index extends Action implements HttpGetActionInterface
 {
@@ -30,7 +30,7 @@ class Index extends Action implements HttpGetActionInterface
         $page = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
         if ($page instanceof Page) {
             $page->setActiveMenu('Hryvinskyi_ActivityLog::activity_grid');
-            $page->getConfig()->getTitle()->prepend((string) __('All Activity'));
+            $page->getConfig()->getTitle()->prepend((string) __('Activity'));
         }
 
         return $page;

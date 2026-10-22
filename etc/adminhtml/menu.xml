@@ -14,9 +14,9 @@
              resource="Hryvinskyi_ActivityLog::activity_log"/>
         <add id="Hryvinskyi_ActivityLog::activity_dashboard" title="Dashboard" translate="title"
              module="Hryvinskyi_ActivityLog" sortOrder="10" parent="Hryvinskyi_ActivityLog::activity_log"
-             action="activitylog/dashboard/index" resource="Hryvinskyi_ActivityLog::dashboard"/>
+             action="hryvinskyi_activitylog/dashboard/index" resource="Hryvinskyi_ActivityLog::dashboard"/>
         <add id="Hryvinskyi_ActivityLog::activity_grid" title="All Activity" translate="title"
              module="Hryvinskyi_ActivityLog" sortOrder="20" parent="Hryvinskyi_ActivityLog::activity_log"
-             action="activitylog/activity/index" resource="Hryvinskyi_ActivityLog::view"/>
+             action="hryvinskyi_activitylog/activity/index" resource="Hryvinskyi_ActivityLog::view"/>
     </menu>
 </config>

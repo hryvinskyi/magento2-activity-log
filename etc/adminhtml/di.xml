@@ -20,11 +20,22 @@
     </virtualType>
     <type name="Magento\Ui\Model\Export\MetadataProvider">
         <plugin name="hryvinskyi_activity_log_export_time" type="Hryvinskyi\ActivityLog\Plugin\Ui\Export\FormatActivityTime"/>
+        <plugin name="hryvinskyi_activity_log_export_text" type="Hryvinskyi\ActivityLog\Plugin\Ui\Export\GuardExportedText"/>
+    </type>
+    <!-- The activity grid's columns whose text comes from people and clients -->
+    <type name="Hryvinskyi\ActivityLog\Plugin\Ui\Export\GuardExportedText">
         <arguments>
-            <argument name="data" xsi:type="array">
-                <item name="hryvinskyi_activity_log_listing" xsi:type="array">
-                    <item name="created_at" xsi:type="string">created_at</item>
-                </item>
+            <argument name="fields" xsi:type="array">
+                <item name="actor_name" xsi:type="string">actor_name</item>
+                <item name="action" xsi:type="string">action</item>
+                <item name="subject_label" xsi:type="string">subject_label</item>
+                <item name="change_field" xsi:type="string">change_field</item>
+                <item name="change_values" xsi:type="string">change_values</item>
+                <item name="change_scope" xsi:type="string">change_scope</item>
+                <item name="ip" xsi:type="string">ip</item>
+                <item name="user_agent" xsi:type="string">user_agent</item>
+                <item name="correlation_id" xsi:type="string">correlation_id</item>
+                <item name="correlation_full" xsi:type="string">correlation_full</item>
             </argument>
         </arguments>
     </type>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<!--
+    What every page showing the activity timeline needs besides its script: the timeline's stylesheet, its config
+    (wording, verbs, channels, kinds of actor, outcomes) and the element templates it clones. A page includes it with
+    <update handle="hryvinskyi_activitylog_timeline_assets"/>; the assets are printed once, at the end of the body.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Hryvinskyi_ActivityLog::css/activity-log.css"/>
+        <css src="Hryvinskyi_ActivityLog::css/timeline.css"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" name="activity.timeline.assets"
+                   template="Hryvinskyi_ActivityLog::timeline/assets.phtml">
+                <arguments>
+                    <argument name="assets" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\TimelineAssets</argument>
+                    <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

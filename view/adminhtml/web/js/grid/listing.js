@@ -5,35 +5,20 @@
  */
 
 /**
- * The activity grid's rows, with the rows of one operation grouped under the activity that started it. A link to
- * the grid can ask for filters in its query string; they are applied as ordinary, removable filters.
+ * The activity grid's rows, with the rows of one operation grouped under the activity that started it. What the
+ * grid shows is the search its provider is given (the "activity_search" parameter), never filters of its own.
  */
 define([
     'Magento_Ui/js/grid/listing',
-    'uiRegistry',
-    'Hryvinskyi_ActivityLog/js/model/operation-groups',
-    'Hryvinskyi_ActivityLog/js/model/url-filters',
-    'Hryvinskyi_ActivityLog/js/grid/apply-filter'
-], function (Listing, registry, operationGroups, urlFilters, applyFilter) {
+    'Hryvinskyi_ActivityLog/js/model/operation-groups'
+], function (Listing, operationGroups) {
     'use strict';
 
     return Listing.extend({
         defaults: {
-            urlFilterFields: {},
-            filtersName: '${ $.ns }.${ $.ns }.listing_top.listing_filters',
             listens: {
                 rows: 'groupOperations'
             }
-        },
-
-        /**
-         * @returns {Object} Chainable.
-         */
-        initialize: function () {
-            this._super();
-            this.applyUrlFilters(window.location.search);
-
-            return this;
         },
 
         /**
@@ -51,21 +36,6 @@ define([
             grouped = operationGroups.arrange(rows);
             grouped.operationsGrouped = true;
             this.rows = grouped;
-        },
-
-        /**
-         * @param {string} search
-         */
-        applyUrlFilters: function (search) {
-            var values = urlFilters.read(search, Object.keys(this.urlFilterFields));
-
-            if (Object.keys(values).length === 0) {
-                return;
-            }
-
-            registry.get(this.filtersName, function (filters) {
-                applyFilter(filters, values);
-            });
         }
     });
 });

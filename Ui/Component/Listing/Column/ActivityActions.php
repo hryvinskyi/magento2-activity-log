@@ -19,7 +19,7 @@ use Magento\Ui\Component\Listing\Columns\Column;
  */
 class ActivityActions extends Column
 {
-    public const URL_PATH_VIEW = 'activitylog/activity/view';
+    public const URL_PATH_VIEW = 'hryvinskyi_activitylog/activity/view';
 
     /**
      * @param ContextInterface $context

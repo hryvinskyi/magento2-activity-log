@@ -6,7 +6,7 @@
 
 /**
  * Who an activity is attributed to: the account, and for a delegated action the client that acted for it.
- * Clicking the name filters the grid by that actor.
+ * Clicking the name asks the search for that actor.
  */
 define([
     'Hryvinskyi_ActivityLog/js/grid/columns/activity-column',
@@ -83,9 +83,11 @@ define([
 
         /**
          * @param {Object} row
+         * @param {Object} context The row as the click binding passes it
+         * @param {Event} event
          */
-        filterByActor: function (row) {
-            this.filterBy({actor_name: row.actor_name});
+        filterByActor: function (row, context, event) {
+            this.addCriterion(event, 'by', row.actor_name);
         }
     });
 });

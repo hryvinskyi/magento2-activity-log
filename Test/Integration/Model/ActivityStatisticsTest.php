@@ -121,13 +121,13 @@ class ActivityStatisticsTest extends TestCase
         self::assertSame(['execute_ability catalog.product_repository.delete'], array_column($denied, 'action'));
     }
 
-    public function testTheGridKnowsHowManyActivitiesShareEachOperation(): void
+    public function testTheGridKnowsHowManyActivitiesShareEachOperationOfAPageItReads(): void
     {
         $collection = self::service(GridCollection::class, [
             'mainTable' => ActivityResource::TABLE,
             'resourceModel' => ActivityResource::class,
         ]);
-        $collection->addFieldToFilter('correlation_id', 'op-aaaaaaaa');
+        $collection->addFieldToFilter('channel', 'entity')->setPageSize(20);
 
         $sizes = [];
         foreach ($collection->getItems() as $item) {
@@ -136,7 +136,22 @@ class ActivityStatisticsTest extends TestCase
             $sizes[] = (int) $size;
         }
 
-        self::assertSame([2, 2], $sizes);
+        self::assertSame([2], $sizes, 'The whole operation counts, whatever the grid shows of it');
+    }
+
+    public function testACollectionReadWholeGetsNoComputedColumns(): void
+    {
+        $collection = self::service(GridCollection::class, [
+            'mainTable' => ActivityResource::TABLE,
+            'resourceModel' => ActivityResource::class,
+        ]);
+        $collection->addFieldToFilter('correlation_id', 'op-aaaaaaaa');
+
+        self::assertCount(2, $collection->getItems());
+        foreach ($collection->getItems() as $item) {
+            self::assertFalse($item->hasData('operation_size'));
+            self::assertFalse($item->hasData('change_field'));
+        }
     }
 
     /**

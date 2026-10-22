@@ -5,7 +5,7 @@
  */
 
 /**
- * The channel badge; clicking it filters the grid by that channel.
+ * The channel badge; clicking it asks the search for that channel.
  */
 define([
     'Hryvinskyi_ActivityLog/js/grid/columns/activity-column'
@@ -37,9 +37,11 @@ define([
 
         /**
          * @param {Object} row
+         * @param {Object} context The row as the click binding passes it
+         * @param {Event} event
          */
-        filterByChannel: function (row) {
-            this.filterBy({channel: row.channel});
+        filterByChannel: function (row, context, event) {
+            this.addCriterion(event, 'channel', row.channel);
         }
     });
 });

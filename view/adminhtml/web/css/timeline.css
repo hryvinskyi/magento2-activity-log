@@ -1,0 +1,747 @@
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+/* The activity timeline: day groups, one sentence per activity, field rows, the request's other activities, states */
+.activity-stream {
+    display: flex;
+    flex-direction: column;
+    color: #303030;
+    font-size: 14px;
+    line-height: 1.36;
+}
+
+/* The results take the focus when the control that had it is drawn away; a pointer user needs no ring for that */
+.activity-stream:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.activity-stream [hidden] {
+    display: none !important;
+}
+
+.activity-stream__muted {
+    color: #6b6b6b;
+}
+
+.activity-stream__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid #e3e3e3;
+    color: #514943;
+    font-size: 13px;
+}
+
+.activity-stream__count {
+    color: #303030;
+}
+
+.activity-stream__live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.activity-stream__primary,
+.activity-stream__secondary,
+.activity-stream__link-button {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.activity-stream__primary {
+    border: 1px solid #eb5202;
+    background: #eb5202;
+    box-shadow: 0 1px 2px rgba(235, 82, 2, .35);
+    color: #fff;
+}
+
+.activity-stream__primary:hover {
+    border-color: #ba4000;
+    background: #ba4000;
+}
+
+.activity-stream__secondary {
+    border: 1px solid #adadad;
+    background: #fff;
+    color: #514943;
+}
+
+.activity-stream__secondary:hover {
+    background: #f5f5f5;
+}
+
+.activity-stream__secondary[disabled] {
+    cursor: progress;
+    opacity: .6;
+}
+
+.activity-stream__link-button {
+    border: 0;
+    background: none;
+    color: #007bdb;
+}
+
+.activity-stream__link-button:hover {
+    text-decoration: underline;
+}
+
+.activity-stream__primary:focus-visible,
+.activity-stream__secondary:focus-visible,
+.activity-stream__link-button:focus-visible,
+.activity-stream__link:focus-visible,
+.activity-stream__correlation:focus-visible,
+.activity-stream__example:focus-visible,
+.activity-stream__item:focus-visible {
+    outline: 2px solid #007bdb;
+    outline-offset: 2px;
+}
+
+.activity-stream__day {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 14px 0 6px;
+    border-bottom: 1px solid #d6d6d6;
+    background: #fff;
+}
+
+.activity-stream__day-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.activity-stream__day-count {
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+.activity-stream__item {
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 0 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-stream__when {
+    padding-top: 2px;
+}
+
+.activity-stream__clock {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-stream__ms {
+    color: #adadad;
+    font-size: 11px;
+}
+
+.activity-stream__channel {
+    margin-top: 5px;
+}
+
+.activity-stream__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* A fixed line box taller than a value pill (its text, 1px padding above and below), so a pill that wraps onto a line
+   of its own never paints over the line below it, whatever font the admin's browser falls back to */
+.activity-stream__sentence {
+    margin: 0;
+    font-size: 14px;
+    line-height: 24px;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__actor,
+.activity-stream__subject {
+    color: #303030;
+    font-weight: 600;
+}
+
+button.activity-stream__actor {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.activity-stream__via {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    line-height: 16px;
+    vertical-align: 1px;
+}
+
+.activity-stream__via--unknown {
+    background: #ececec;
+    color: #4d4d4d;
+}
+
+.activity-stream__sentence .activity-outcome {
+    vertical-align: 1px;
+}
+
+.activity-stream__actor:hover,
+.activity-stream__subject:hover {
+    color: #007bdb;
+}
+
+/* Every line of a wrapped pill keeps its padding and corners */
+.activity-stream__before,
+.activity-stream__after {
+    padding: 1px 5px;
+    border-radius: 2px;
+    overflow-wrap: anywhere;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+.activity-stream__before {
+    background: #fbe4e2;
+    color: #8a1f18;
+    text-decoration: line-through;
+}
+
+.activity-stream__after {
+    background: #e3f3e6;
+    color: #145c2c;
+    font-weight: 600;
+}
+
+.activity-stream__value--empty {
+    background: transparent;
+    color: #6b6b6b;
+    font-style: italic;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.activity-stream__arrow {
+    color: #6b6b6b;
+}
+
+.activity-stream__rows {
+    overflow: hidden;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.activity-stream__row {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    align-items: start;
+    gap: 0 12px;
+    padding: 7px 12px;
+    border-top: 1px solid #eee;
+    background: #fff;
+}
+
+.activity-stream__row:first-child {
+    border-top: 0;
+}
+
+.activity-stream__row:nth-child(even) {
+    background: #fafafa;
+}
+
+.activity-stream__row--highlighted,
+.activity-stream__row--highlighted:nth-child(even) {
+    background: #fff8d6;
+}
+
+.activity-stream__field {
+    min-width: 0;
+}
+
+.activity-stream__field-label {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__field-name {
+    color: #6b6b6b;
+    font-family: Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__field-scope {
+    color: #6b6b6b;
+    font-size: 11.5px;
+}
+
+.activity-stream__value {
+    min-width: 0;
+    line-height: 22px;
+}
+
+.activity-stream__masked {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.activity-stream__lock {
+    width: 12px;
+    height: 12px;
+    color: #514943;
+}
+
+.activity-stream__secret {
+    font-family: Menlo, Consolas, monospace;
+    letter-spacing: 1px;
+}
+
+.activity-stream__masked-tag {
+    padding: 0 5px;
+    border: 1px solid #adadad;
+    border-radius: 2px;
+    color: #514943;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+}
+
+.activity-stream__automatic-tag {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 0 5px;
+    border: 1px solid #c4c4c4;
+    border-radius: 2px;
+    background: #f5f5f5;
+    color: #6b6b6b;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    line-height: 16px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.activity-stream__automatic-tag[hidden] {
+    display: none;
+}
+
+.activity-stream__system {
+    color: #303030;
+    font-weight: 600;
+}
+
+.activity-stream__masked-note {
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+.activity-stream__long {
+    position: relative;
+    max-height: 62px;
+    overflow: hidden;
+    padding: 6px 8px;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    background: #fafafa;
+    font-family: Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__long--full {
+    max-height: none;
+}
+
+.activity-stream__del {
+    background: #fbe4e2;
+    color: #8a1f18;
+    text-decoration: line-through;
+}
+
+.activity-stream__ins {
+    background: #e3f3e6;
+    color: #145c2c;
+}
+
+.activity-stream__json {
+    padding: 4px 8px;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    background: #fafafa;
+    font-family: Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.activity-stream__json-removed,
+.activity-stream__json-added,
+.activity-stream__json-same {
+    margin: 1px 0;
+    padding: 0 6px;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__json-removed {
+    background: #fbe4e2;
+    color: #b0251d;
+}
+
+.activity-stream__json-added {
+    background: #e3f3e6;
+    color: #1e7b3c;
+}
+
+.activity-stream__json-same {
+    color: #6b6b6b;
+}
+
+.activity-stream__value-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 4px;
+    color: #6b6b6b;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.activity-stream__more-fields {
+    padding: 6px 12px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+.activity-stream__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 2px;
+    color: #6b6b6b;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.activity-stream__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #007bdb;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.activity-stream__link:hover {
+    text-decoration: underline;
+}
+
+/* The admin theme paints every focused or pressed button grey; the timeline's buttons keep their own look */
+.activity-stream .activity-stream__link:focus,
+.activity-stream .activity-stream__link:active,
+.activity-stream button.activity-stream__actor:focus,
+.activity-stream button.activity-stream__actor:active,
+.activity-stream .activity-stream__link-button:focus,
+.activity-stream .activity-stream__link-button:active {
+    background: none;
+    box-shadow: none;
+}
+
+.activity-stream .activity-stream__correlation:focus,
+.activity-stream .activity-stream__correlation:active {
+    background: #f3f3f3;
+    box-shadow: none;
+}
+
+.activity-stream .activity-stream__secondary:focus,
+.activity-stream .activity-stream__secondary:active,
+.activity-stream .activity-stream__example:focus,
+.activity-stream .activity-stream__example:active {
+    background: #fff;
+    box-shadow: none;
+}
+
+.activity-stream .activity-stream__primary:focus,
+.activity-stream .activity-stream__primary:active {
+    background: #eb5202;
+    box-shadow: 0 1px 2px rgba(235, 82, 2, .35);
+}
+
+.activity-stream__chevron {
+    width: 10px;
+    height: 10px;
+    transform: rotate(-90deg);
+}
+
+.activity-stream__siblings-toggle[aria-expanded="true"] .activity-stream__chevron {
+    transform: none;
+}
+
+.activity-stream__request {
+    display: inline-flex;
+    align-items: center;
+}
+
+.activity-stream__correlation {
+    display: inline-block;
+    padding: 0 6px;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    background: #f3f3f3;
+    color: #303030;
+    font-family: Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    cursor: pointer;
+}
+
+.activity-stream__correlation:hover {
+    border-color: #adadad;
+    background: #fff;
+    text-decoration: none;
+}
+
+.activity-stream__details {
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.activity-stream__sibling-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-left: 4px;
+    padding-left: 12px;
+    border-left: 2px solid #d6d6d6;
+    font-size: 12.5px;
+}
+
+.activity-stream__sibling {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.activity-stream__sibling-clock {
+    min-width: 92px;
+    white-space: nowrap;
+    color: #514943;
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-stream__sibling-action {
+    color: #303030;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.activity-stream__sibling-outcome {
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+/* Loading, empty log, no results, the narrow-search notice and paging */
+@keyframes activity-stream-pulse {
+    0% { opacity: .5; }
+    50% { opacity: 1; }
+    100% { opacity: .5; }
+}
+
+.activity-stream__skeleton {
+    padding-top: 14px;
+    border-top: 1px solid #e3e3e3;
+}
+
+.activity-stream__skeleton-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-stream__skeleton-bar {
+    height: 14px;
+    margin-bottom: 8px;
+    background: #e9e9e9;
+    animation: activity-stream-pulse 1.4s infinite;
+}
+
+.activity-stream__skeleton-bar--head {
+    width: 280px;
+    margin-bottom: 14px;
+}
+
+.activity-stream__skeleton-bar--time {
+    width: 60px;
+}
+
+.activity-stream__skeleton-bar--line {
+    width: 70%;
+}
+
+.activity-stream__skeleton-bar--sub {
+    width: 220px;
+    height: 12px;
+}
+
+.activity-stream__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 36px 32px;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.activity-stream__state--empty {
+    gap: 10px;
+    padding: 44px 32px;
+}
+
+.activity-stream__state-icon {
+    width: 36px;
+    height: 36px;
+    color: #adadad;
+}
+
+.activity-stream__state-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.activity-stream__state--empty .activity-stream__state-title {
+    font-size: 18px;
+}
+
+.activity-stream__state-text {
+    max-width: 520px;
+    color: #514943;
+}
+
+.activity-stream__state-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.activity-stream__examples {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 760px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.activity-stream__example {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    background: #fff;
+    color: #303030;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.activity-stream__example:hover {
+    border-color: #adadad;
+    background: #f8f8f8;
+}
+
+.activity-stream__example-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.activity-stream__example-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.activity-stream__example-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    background: #f3f3f3;
+}
+
+.activity-stream__example-key {
+    color: #7e2459;
+    font-weight: 600;
+}
+
+.activity-stream__notice {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e3d9a6;
+    border-radius: 3px;
+    background: #fffbe5;
+    color: #514943;
+    font-size: 13px;
+}
+
+.activity-stream__paging {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px 0 4px;
+    color: #6b6b6b;
+    font-size: 13px;
+}
+
+.activity-stream__head:not([hidden]) ~ .activity-stream__status .activity-stream__state {
+    margin-top: 12px;
+}

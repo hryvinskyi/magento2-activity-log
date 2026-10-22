@@ -5,28 +5,27 @@
  */
 
 /**
- * "View" opens the activity; "Show related" filters the grid to its operation.
+ * "View" opens the activity; "Show related" asks the search for its operation alone: every activity of it.
  */
 define([
     'Magento_Ui/js/grid/columns/column',
-    'Hryvinskyi_ActivityLog/js/grid/apply-filter'
-], function (Column, applyFilter) {
+    'Hryvinskyi_ActivityLog/js/grid/announce-criterion'
+], function (Column, announceCriterion) {
     'use strict';
 
     return Column.extend({
         defaults: {
             bodyTmpl: 'Hryvinskyi_ActivityLog/grid/cells/activity-actions',
-            sortable: false,
-            modules: {
-                filters: '${ $.ns }.${ $.ns }.listing_top.listing_filters'
-            }
+            sortable: false
         },
 
         /**
          * @param {Object} row
+         * @param {Object} context The row as the click binding passes it
+         * @param {Event} event
          */
-        showRelated: function (row) {
-            applyFilter(this.filters(), {correlation_id: row.correlation_id});
+        showRelated: function (row, context, event) {
+            announceCriterion(event, 'request', row.correlation_id, true);
         }
     });
 });

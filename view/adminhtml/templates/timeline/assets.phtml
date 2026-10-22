@@ -1,0 +1,164 @@
+<?php
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+declare(strict_types=1);
+
+use Hryvinskyi\ActivityLog\Api\IconsInterface;
+use Hryvinskyi\ActivityLog\ViewModel\TimelineAssets;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/**
+ * What the activity timeline renders with, printed once per page by the "hryvinskyi_activitylog_timeline_assets"
+ * layout handle: its config (wording, verbs, channels, kinds of actor, outcomes) as JSON, and the element templates
+ * it clones. A template's parts carry data-slot names the renderer fills with textContent; nothing in them is data.
+ *
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+$assets = $block->getData('assets');
+if (!$assets instanceof TimelineAssets) {
+    return;
+}
+$icons = $block->getData('icons');
+$icon = static fn (string $id, string $class): string => $icons instanceof IconsInterface
+    ? $icons->render($id, $class)
+    : '';
+?>
+<div class="activity-stream-assets" data-role="activity-timeline-assets" hidden>
+    <script type="application/json" data-role="activity-timeline-config">
+        <?= /* @noEscape */ $assets->configJson() ?>
+    </script>
+
+    <template data-template="results">
+        <div class="activity-stream" aria-busy="false">
+            <div class="activity-stream__head" data-slot="head" hidden>
+                <span aria-live="polite"><strong class="activity-stream__count" data-slot="count"></strong>
+                    <span data-slot="noun"></span></span><span class="activity-stream__muted"
+                                                               data-slot="span"></span>
+            </div>
+            <div class="activity-stream__notice" data-slot="notice" role="status" hidden></div>
+            <div class="activity-stream__list" data-slot="list"></div>
+            <div class="activity-stream__paging" data-slot="paging" hidden>
+                <button type="button" class="activity-stream__secondary" data-action="more"
+                        data-slot="more"></button>
+                <span data-slot="loaded"></span>
+            </div>
+            <div class="activity-stream__status" data-slot="status"></div>
+            <span class="activity-stream__live" data-slot="live" role="status"></span>
+        </div>
+    </template>
+
+    <template data-template="day">
+        <section class="activity-stream__day-group">
+            <div class="activity-stream__day">
+                <span class="activity-stream__day-label" data-slot="label"></span>
+                <span class="activity-stream__day-count" data-slot="count"></span>
+            </div>
+        </section>
+    </template>
+
+    <template data-template="item">
+        <article class="activity-stream__item">
+            <div class="activity-stream__when">
+                <div class="activity-stream__clock" data-slot="when"><span data-slot="clock"></span><span
+                        class="activity-stream__ms" data-slot="ms"></span></div>
+                <span class="activity-badge activity-stream__channel" data-slot="channel"></span>
+            </div>
+            <div class="activity-stream__body">
+                <p class="activity-stream__sentence" data-slot="sentence"></p>
+                <div class="activity-stream__rows" data-slot="rows" hidden></div>
+                <div class="activity-stream__meta">
+                    <span data-slot="actor-type"></span>
+                    <button type="button" class="activity-stream__link" data-slot="unchanged" hidden></button>
+                    <span data-slot="unchanged-count" hidden></span>
+                    <button type="button" class="activity-stream__link activity-stream__siblings-toggle"
+                            data-slot="siblings" aria-expanded="false" hidden>
+                        <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::chevron-down', 'activity-stream__chevron') ?>
+                        <span data-slot="siblings-label"></span>
+                    </button>
+                    <span class="activity-stream__request" data-slot="correlation"></span>
+                    <a class="activity-stream__details" data-slot="details"></a>
+                </div>
+                <div class="activity-stream__sibling-list" data-slot="sibling-list" hidden></div>
+            </div>
+        </article>
+    </template>
+
+    <template data-template="row">
+        <div class="activity-stream__row">
+            <div class="activity-stream__field">
+                <div class="activity-stream__field-label" data-slot="label"></div>
+                <div class="activity-stream__field-name" data-slot="name"></div>
+                <div class="activity-stream__field-scope" data-slot="scope"></div>
+                <span class="activity-stream__automatic-tag" data-slot="automatic" hidden></span>
+            </div>
+            <div class="activity-stream__value" data-slot="value"></div>
+        </div>
+    </template>
+
+    <template data-template="masked">
+        <span class="activity-stream__masked">
+            <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::lock', 'activity-stream__lock') ?>
+            <span class="activity-stream__secret">******</span>
+            <span class="activity-stream__arrow">→</span>
+            <span class="activity-stream__secret">******</span>
+            <span class="activity-stream__masked-tag" data-slot="tag"></span>
+            <span class="activity-stream__masked-note" data-slot="note"></span>
+        </span>
+    </template>
+
+    <template data-template="sibling">
+        <div class="activity-stream__sibling">
+            <span class="activity-stream__sibling-clock" data-slot="clock"></span>
+            <span class="activity-badge activity-badge--small" data-slot="channel"></span>
+            <a class="activity-stream__sibling-action" data-slot="action"></a>
+            <span class="activity-stream__muted" data-slot="meta"></span>
+            <span class="activity-stream__sibling-outcome" data-slot="outcome"></span>
+        </div>
+    </template>
+
+    <template data-template="skeleton">
+        <div class="activity-stream__skeleton" aria-hidden="true">
+            <div class="activity-stream__skeleton-bar activity-stream__skeleton-bar--head"></div>
+            <?php for ($line = 0; $line < 6; $line++): ?>
+                <div class="activity-stream__skeleton-item">
+                    <div class="activity-stream__skeleton-bar activity-stream__skeleton-bar--time"></div>
+                    <div>
+                        <div class="activity-stream__skeleton-bar activity-stream__skeleton-bar--line"></div>
+                        <div class="activity-stream__skeleton-bar activity-stream__skeleton-bar--sub"></div>
+                    </div>
+                </div>
+            <?php endfor; ?>
+        </div>
+    </template>
+
+    <template data-template="state">
+        <div class="activity-stream__state">
+            <div class="activity-stream__state-title" data-slot="title"></div>
+            <div class="activity-stream__state-text" data-slot="text"></div>
+            <div class="activity-stream__state-actions" data-slot="actions"></div>
+        </div>
+    </template>
+
+    <template data-template="empty-log">
+        <div class="activity-stream__state activity-stream__state--empty">
+            <?= /* @noEscape */ $icon('Hryvinskyi_ActivityLog::clock', 'activity-stream__state-icon') ?>
+            <div class="activity-stream__state-title" data-slot="title"></div>
+            <div class="activity-stream__state-text" data-slot="text"></div>
+            <div class="activity-stream__examples" data-slot="examples"></div>
+        </div>
+    </template>
+
+    <template data-template="example">
+        <button type="button" class="activity-stream__example">
+            <span class="activity-stream__example-title" data-slot="title"></span>
+            <span class="activity-stream__example-chips" data-slot="chips"></span>
+        </button>
+    </template>
+</div>

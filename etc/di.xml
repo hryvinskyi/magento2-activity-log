@@ -29,6 +29,150 @@
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityPrunerInterface" type="Hryvinskyi\ActivityLog\Model\Retention\ActivityPruner"/>
     <preference for="Hryvinskyi\ActivityLog\Api\ActivityStatisticsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\ActivityStatistics"/>
     <preference for="Hryvinskyi\ActivityLog\Model\Dashboard\PreferenceStorageInterface" type="Hryvinskyi\ActivityLog\Model\Dashboard\BookmarkPreferenceStorage"/>
+    <preference for="Hryvinskyi\ActivityLog\Model\Search\Preference\SearchPreferenceStorageInterface" type="Hryvinskyi\ActivityLog\Model\Search\Preference\BookmarkSearchPreferenceStorage"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Search\ActivitySearchInterface" type="Hryvinskyi\ActivityLog\Model\Search\ActivitySearch"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Search\SubjectLookupInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\SubjectLookup"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Search\RecentSubjectsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\RecentSubjects"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Search\ActivityActorsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\ActivityActors"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Search\ActivityFactsInterface" type="Hryvinskyi\ActivityLog\Model\ResourceModel\ActivityFacts"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\ActivityFactInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\ActivityFact"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SearchRequestInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\SearchRequest"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SearchCriterionInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\SearchCriterion"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SearchCursorInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\SearchCursor"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SearchCountInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\SearchCount"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SearchPageInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\SearchPage"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\EventViewInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\EventView"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\EventDetailInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\EventDetail"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\FieldChangeInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\FieldChange"/>
+    <preference for="Hryvinskyi\ActivityLog\Api\Data\Search\SuggestionInterface" type="Hryvinskyi\ActivityLog\Model\Data\Search\Suggestion"/>
+
+    <!-- Suggestions of the search bar: providers are read through the cache, one entry per provider and locale -->
+    <preference for="Hryvinskyi\ActivityLog\Model\Search\Suggestion\SuggestionReaderInterface" type="Hryvinskyi\ActivityLog\Model\Search\Suggestion\CachedSuggestionReader"/>
+    <type name="Hryvinskyi\ActivityLog\Model\Search\Suggestion\CachedSuggestionReader">
+        <arguments>
+            <argument name="inner" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Suggestion\ProviderReader</argument>
+            <argument name="cache" xsi:type="object">Hryvinskyi\ActivityLog\Model\Cache\Type\SearchCache</argument>
+        </arguments>
+    </type>
+    <!-- Values of the journal's keys; other modules add providers of their keys -->
+    <type name="Hryvinskyi\ActivityLog\Model\Search\SuggestionPool">
+        <arguments>
+            <argument name="suggestionProviders" xsi:type="array">
+                <item name="journal_actors" xsi:type="object" sortOrder="100">Hryvinskyi\ActivityLog\Model\Search\Suggestion\Journal\ActorSuggestions</item>
+                <item name="journal_via_clients" xsi:type="object" sortOrder="110">Hryvinskyi\ActivityLog\Model\Search\Suggestion\Journal\ViaClientSuggestions</item>
+                <item name="journal_channels" xsi:type="object" sortOrder="120">Hryvinskyi\ActivityLog\Model\Search\Suggestion\Journal\ChannelSuggestions</item>
+                <item name="journal_outcomes" xsi:type="object" sortOrder="130">Hryvinskyi\ActivityLog\Model\Search\Suggestion\Journal\OutcomeSuggestions</item>
+                <item name="journal_store_views" xsi:type="object" sortOrder="140">Hryvinskyi\ActivityLog\Model\Search\Suggestion\Journal\StoreViewSuggestions</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Search keys answered from the journal's own columns; other modules add to "conditions" -->
+    <type name="Hryvinskyi\ActivityLog\Model\Search\ConditionPool">
+        <arguments>
+            <argument name="journalConditions" xsi:type="array">
+                <item name="by" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\ActorCondition</item>
+                <item name="via" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\ViaClientCondition</item>
+                <item name="channel" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\ChannelCondition</item>
+                <item name="outcome" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\OutcomeCondition</item>
+                <item name="store" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\StoreCondition</item>
+                <item name="request" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\CorrelationCondition</item>
+                <item name="text" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\Journal\KeywordCondition</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- How the journal's keys are presented; other modules add their keys' descriptions -->
+    <type name="Hryvinskyi\ActivityLog\Model\Search\KeyDescriptionPool">
+        <arguments>
+            <argument name="keyDescriptions" xsi:type="array">
+                <item name="by" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Actor</item>
+                <item name="via" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\ViaClient</item>
+                <item name="channel" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Channel</item>
+                <item name="outcome" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Outcome</item>
+                <item name="store" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Store</item>
+                <item name="request" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Request</item>
+                <item name="text" xsi:type="object">Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Text</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Actor"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">by</argument>
+            <argument name="label" xsi:type="string" translate="true">Actor</argument>
+            <argument name="hint" xsi:type="string" translate="true">Name, or a kind of actor: admin, integration, customer, cli, cron; &quot;name&quot; for exactly that person</argument>
+            <argument name="sortOrder" xsi:type="number">100</argument>
+            <argument name="group" xsi:type="string">people</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\ViaClient"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">via</argument>
+            <argument name="label" xsi:type="string" translate="true">Client</argument>
+            <argument name="hint" xsi:type="string" translate="true">The client an actor worked through</argument>
+            <argument name="sortOrder" xsi:type="number">110</argument>
+            <argument name="group" xsi:type="string">people</argument>
+            <argument name="inPanel" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Channel"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">channel</argument>
+            <argument name="label" xsi:type="string" translate="true">Channel</argument>
+            <argument name="hint" xsi:type="string" translate="true">Where the activity came from</argument>
+            <argument name="control" xsi:type="string">select</argument>
+            <argument name="sortOrder" xsi:type="number">120</argument>
+            <argument name="options" xsi:type="object">Hryvinskyi\ActivityLog\Model\Source\ChannelOptions</argument>
+            <argument name="group" xsi:type="string">other</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Outcome"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">outcome</argument>
+            <argument name="label" xsi:type="string" translate="true">Outcome</argument>
+            <argument name="hint" xsi:type="string" translate="true">Success, failure or denied</argument>
+            <argument name="control" xsi:type="string">select</argument>
+            <argument name="sortOrder" xsi:type="number">130</argument>
+            <argument name="options" xsi:type="object">Hryvinskyi\ActivityLog\Model\Source\OutcomeOptions</argument>
+            <argument name="group" xsi:type="string">other</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Store"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">store</argument>
+            <argument name="label" xsi:type="string" translate="true">Scope / store view</argument>
+            <argument name="hint" xsi:type="string" translate="true">Store view code or name; a | b for any of them</argument>
+            <argument name="sortOrder" xsi:type="number">140</argument>
+            <argument name="group" xsi:type="string">other</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Request"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">request</argument>
+            <argument name="label" xsi:type="string" translate="true">Request</argument>
+            <argument name="hint" xsi:type="string" translate="true">Correlation ID shared by everything one request did</argument>
+            <argument name="sortOrder" xsi:type="number">150</argument>
+            <argument name="group" xsi:type="string">other</argument>
+            <argument name="inPanel" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\Text"
+                 type="Hryvinskyi\ActivityLog\Model\Search\KeyDescription\KeyDescription">
+        <arguments>
+            <argument name="key" xsi:type="string">text</argument>
+            <argument name="label" xsi:type="string" translate="true">Text</argument>
+            <argument name="hint" xsi:type="string" translate="true">Words anywhere in the activity</argument>
+            <argument name="sortOrder" xsi:type="number">1000</argument>
+            <argument name="group" xsi:type="string">other</argument>
+            <argument name="inPanel" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
 
     <type name="Hryvinskyi\ActivityLog\Model\Sanitizer\Sanitizer">
         <arguments>
@@ -86,6 +230,15 @@
         <arguments>
             <argument name="mainTable" xsi:type="string">hryvinskyi_activity_log</argument>
             <argument name="resourceModel" xsi:type="string">Hryvinskyi\ActivityLog\Model\ResourceModel\Activity</argument>
+        </arguments>
+    </type>
+    <!-- The activity grid's search, applied to its collection as one condition; a proxy, so other grids sharing the
+         pool never build the search -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="activity_search" xsi:type="object">Hryvinskyi\ActivityLog\Ui\DataProvider\ActivitySearchFilter\Proxy</item>
+            </argument>
         </arguments>
     </type>
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">

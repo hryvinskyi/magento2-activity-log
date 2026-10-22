@@ -6,23 +6,31 @@
  * GitHub: https://github.com/hryvinskyi
  */
 -->
+<!--
+    The activity search page. A module adds a header button by adding a block to "activity.search.actions". The grid
+    view is the listing below; the timeline view is drawn into the page's results area.
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="hryvinskyi_activitylog_menu"/>
+    <update handle="hryvinskyi_activitylog_timeline_assets"/>
     <head>
         <css src="Hryvinskyi_ActivityLog::css/activity-log.css"/>
+        <css src="Hryvinskyi_ActivityLog::css/search.css"/>
     </head>
     <body>
         <referenceContainer name="content">
-            <block class="Magento\Backend\Block\Template" name="activity.grid.actions"
-                   template="Hryvinskyi_ActivityLog::activity/grid-actions.phtml" before="-">
+            <block class="Magento\Framework\View\Element\Template" name="activity.search"
+                   template="Hryvinskyi_ActivityLog::search/page.phtml">
                 <arguments>
+                    <argument name="page" xsi:type="object">Hryvinskyi\ActivityLog\ViewModel\SearchPage</argument>
                     <argument name="icons" xsi:type="object">Hryvinskyi\ActivityLog\Api\IconsInterface</argument>
                 </arguments>
+                <container name="activity.search.actions" as="activity.search.actions"/>
+                <container name="activity.grid" as="activity.grid" htmlTag="div" htmlClass="activity-log-grid">
+                    <uiComponent name="hryvinskyi_activity_log_listing"/>
+                </container>
             </block>
-            <container name="activity.grid" htmlTag="div" htmlClass="activity-log-grid">
-                <uiComponent name="hryvinskyi_activity_log_listing"/>
-            </container>
         </referenceContainer>
     </body>
 </page>

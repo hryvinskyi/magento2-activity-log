@@ -82,7 +82,7 @@ class DashboardPage implements ArgumentInterface
      */
     public function gridUrl(): string
     {
-        return $this->urlBuilder->getUrl('activitylog/activity/index');
+        return $this->urlBuilder->getUrl('hryvinskyi_activitylog/activity/index');
     }
 
     /**
@@ -161,8 +161,8 @@ class DashboardPage implements ArgumentInterface
         }
 
         return [
-            'dataUrl' => $this->urlBuilder->getUrl('activitylog/dashboard/data'),
-            'preferenceUrl' => $this->urlBuilder->getUrl('activitylog/dashboard/savePreference'),
+            'dataUrl' => $this->urlBuilder->getUrl('hryvinskyi_activitylog/dashboard/data'),
+            'preferenceUrl' => $this->urlBuilder->getUrl('hryvinskyi_activitylog/dashboard/savePreference'),
             'formKey' => $this->formKey->getFormKey(),
             'periodDays' => $query->getPeriodDays(),
             'channels' => $query->getChannels(),

@@ -116,7 +116,7 @@ class TopActorsWidget implements DashboardWidgetInterface
                         : '0%',
                 ],
                 'href' => $this->urlBuilder->getUrl(
-                    'activitylog/activity/index',
+                    'hryvinskyi_activitylog/activity/index',
                     ['_query' => ['actor_name' => $actor['actorName']]]
                 ),
             ];

@@ -23,14 +23,14 @@
                     <argument name="items" xsi:type="array">
                         <item name="dashboard" xsi:type="array">
                             <item name="label" xsi:type="string" translate="true">Dashboard</item>
-                            <item name="route" xsi:type="string">activitylog/dashboard/index</item>
+                            <item name="route" xsi:type="string">hryvinskyi_activitylog/dashboard/index</item>
                             <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::dashboard</item>
                             <item name="sort_order" xsi:type="number">5</item>
                             <item name="icon" xsi:type="string"><![CDATA[<svg aria-hidden="true" focusable="false" class="menu-item-icon lucide lucide-layout-dashboard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>]]></item>
                         </item>
                         <item name="all_activity" xsi:type="array">
                             <item name="label" xsi:type="string" translate="true">All Activity</item>
-                            <item name="route" xsi:type="string">activitylog/activity/index</item>
+                            <item name="route" xsi:type="string">hryvinskyi_activitylog/activity/index</item>
                             <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::view</item>
                             <item name="sort_order" xsi:type="number">10</item>
                             <item name="icon" xsi:type="string"><![CDATA[<svg aria-hidden="true" focusable="false" class="menu-item-icon lucide lucide-list" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg>]]></item>

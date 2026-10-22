@@ -6,12 +6,12 @@
 
 /**
  * Base of the activity grid's columns: the channel, outcome and duration vocabulary the server hands every
- * column, and filtering the grid from a cell.
+ * column, and asking the page's search for a filter from a cell.
  */
 define([
     'Magento_Ui/js/grid/columns/column',
-    'Hryvinskyi_ActivityLog/js/grid/apply-filter'
-], function (Column, applyFilter) {
+    'Hryvinskyi_ActivityLog/js/grid/announce-criterion'
+], function (Column, announceCriterion) {
     'use strict';
 
     var UNKNOWN_CHANNEL = Object.freeze({chart: '#8C8C8C', bg: '#ECECEC', fg: '#4D4D4D'});
@@ -21,10 +21,7 @@ define([
             channels: {},
             outcomes: {},
             durationScale: [],
-            timezone: 'UTC',
-            modules: {
-                filters: '${ $.ns }.${ $.ns }.listing_top.listing_filters'
-            }
+            timezone: 'UTC'
         },
 
         /**
@@ -40,10 +37,15 @@ define([
         },
 
         /**
-         * @param {Object} values Filter values by field
+         * Asks the page's search for a filter, from the user's event on the cell
+         *
+         * @param {?Event} event
+         * @param {string} key A search key
+         * @param {*} value
+         * @param {boolean=} alone True to ask for this filter alone, replacing the others
          */
-        filterBy: function (values) {
-            applyFilter(this.filters(), values);
+        addCriterion: function (event, key, value, alone) {
+            announceCriterion(event, key, value, alone);
         }
     });
 });

@@ -28,8 +28,8 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class ActivityDetail implements ArgumentInterface
 {
-    public const URL_PATH_GRID = 'activitylog/activity/index';
-    public const URL_PATH_DELETE = 'activitylog/activity/delete';
+    public const URL_PATH_GRID = 'hryvinskyi_activitylog/activity/index';
+    public const URL_PATH_DELETE = 'hryvinskyi_activitylog/activity/delete';
 
     /**
      * @param CurrentActivity $currentActivity
