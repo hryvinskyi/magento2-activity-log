@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-23
+
+### Added
+- A program that calls the store without signing in (a webhook, a feed fetcher) is named by its user agent's first
+  product, `acme-webhook-invoker/1.2384`, instead of "anonymous". The actor stays anonymous: the name is what the
+  caller says. Browsers keep the plain "anonymous" (`Model\Actor\Resolver\CallingAgentActorResolver`).
+
 ## [1.2.0] - 2026-10-23
 
 ### Added

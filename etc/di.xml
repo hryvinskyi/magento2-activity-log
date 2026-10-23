@@ -219,6 +219,15 @@
                 <item name="actor_scope" xsi:type="object" sortOrder="10">Hryvinskyi\ActivityLog\Model\Actor\ActorScope</item>
                 <item name="user_context" xsi:type="object" sortOrder="100">Hryvinskyi\ActivityLog\Model\Actor\Resolver\UserContextActorResolver</item>
                 <item name="process" xsi:type="object" sortOrder="200">Hryvinskyi\ActivityLog\Model\Actor\Resolver\ProcessActorResolver</item>
+                <item name="calling_agent" xsi:type="object" sortOrder="300">Hryvinskyi\ActivityLog\Model\Actor\Resolver\CallingAgentActorResolver</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Hryvinskyi\ActivityLog\Model\Actor\Resolver\CallingAgentActorResolver">
+        <arguments>
+            <argument name="browserPrefixes" xsi:type="array">
+                <item name="mozilla" xsi:type="string">Mozilla/</item>
+                <item name="opera" xsi:type="string">Opera/</item>
             </argument>
         </arguments>
     </type>

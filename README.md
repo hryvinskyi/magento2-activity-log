@@ -7,6 +7,10 @@ the journal, its dashboard, its search page and detail page. Channel modules rec
 - Records an **activity** per action: actor (admin, integration, customer, guest, CLI, cron), channel, action,
   subject, outcome (`success`, `failure`, `denied`), duration, store, IP, user agent and a correlation id shared by
   everything one operation caused.
+- A web request in which nobody is signed in is anonymous. A program calling that way (a payment provider's webhook, a
+  feed fetcher) is named by the first product of its user agent, `acme-webhook-invoker/1.2384`; the name is what the
+  caller says, never checked. A browser stays plain "anonymous". The browsers are the `browserPrefixes` argument of
+  `Model\Actor\Resolver\CallingAgentActorResolver` in `di.xml`.
 - Masks secrets before anything is stored: passwords, tokens, keys, cookies and authorization headers, in arrays and
   in JSON, XML, form-encoded and plain-text bodies.
 - Shows the journal in **System › Activity Log**: a dashboard with summary cards and widgets, a search page with a
