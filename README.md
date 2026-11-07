@@ -79,7 +79,7 @@ The older `?channel=`, `?correlation_id=` and `?actor_name=` still work.
 
 ## Requirements
 - Magento 2.4 with PHP 8.1 or later
-- `hryvinskyi/magento2-base` ^2.2
+- `hryvinskyi/magento2-base` ^2.3
 - `hryvinskyi/magento2-configuration-fields` ^1.0.11
 
 ## Installation
@@ -117,6 +117,11 @@ A channel module depends on this package's `Api/` contracts only:
 - The detail page adds the layout handle `hryvinskyi_activitylog_activity_view_channel_<code>`; a channel puts its
   panel into the `activity.channel.panel` container.
 - `IconsInterface` renders a module's SVG icons inline in admin templates.
+- The Activity Log menu (layout handle `hryvinskyi_activitylog_menu`, block `hryvinskyi.activity.log.menu`) takes a
+  channel's entries in its `items` argument. Each entry names one of the menu's groups in its `group` key: `logs`
+  (what was recorded), `pages` (the module's own admin pages) or `settings` (its configuration section). Labels are
+  sentence case, and an entry under Settings does not repeat the word "settings" (**Webhook logging**, not "Webhook
+  logging settings").
 
 ## Extending the search
 A module that records into the journal serves its own keys on the search page with the contracts below. They are

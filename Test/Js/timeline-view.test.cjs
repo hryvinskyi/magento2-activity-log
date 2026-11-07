@@ -552,7 +552,7 @@ test('timeline: "N more in this request" loads the request once, without the act
         limit: 200
     });
     t.search.calls[1].resolve(resultPage({events: [
-        event({id: 9, channel: 'admin', action: 'POST catalog/product/save', subject: null, outcome: 'success',
+        event({id: 9, channel: 'zz_one', action: 'POST acme_shop/widget/save', subject: null, outcome: 'success',
             occurredAtMs: utc(2026, 9, 22, 10, 5, 9, 1)}),
         event({id: 1}),
         event({id: 8, outcome: 'denied', durationMs: null, detail: detail({fields: [field()]})})
@@ -561,8 +561,8 @@ test('timeline: "N more in this request" loads the request once, without the act
 
     assert.equal(list.children.length, 2);
     assert.equal(t.slot('clock', list.children[0]).textContent, '12:05:09.001');
-    assert.equal(t.slot('action', list.children[0]).textContent, 'POST catalog/product/save');
-    assert.equal(t.slot('channel', list.children[0]).textContent, 'admin', 'a channel nobody describes keeps its code');
+    assert.equal(t.slot('action', list.children[0]).textContent, 'POST acme_shop/widget/save');
+    assert.equal(t.slot('channel', list.children[0]).textContent, 'zz_one', 'a channel nobody describes keeps its code');
     assert.equal(t.slot('action', list.children[1]).textContent, 'Saved · Record 1245');
     assert.equal(t.slot('meta', list.children[1]).textContent, 'Price');
     assert.equal(t.slot('outcome', list.children[1]).textContent, 'Denied');

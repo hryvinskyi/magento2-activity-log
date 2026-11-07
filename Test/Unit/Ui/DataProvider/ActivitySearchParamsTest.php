@@ -43,7 +43,7 @@ class ActivitySearchParamsTest extends TestCase
         $value = $params->filterValue([
             'from' => '1000',
             'to' => '2000',
-            'c' => ['by:jane', 'channel:entity'],
+            'c' => ['by:jane', 'channel:zz_change'],
             'changes' => '0',
             'cursor' => 'not even a cursor',
             'limit' => '9999',
@@ -57,7 +57,7 @@ class ActivitySearchParamsTest extends TestCase
             $request->getCursor(),
         ]);
         self::assertSame(
-            [['by', 'jane'], ['channel', 'entity']],
+            [['by', 'jane'], ['channel', 'zz_change']],
             array_map(static fn ($c): array => [$c->getKey(), $c->getValue()], $request->getCriteria())
         );
     }

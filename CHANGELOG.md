@@ -5,12 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-10-23
+## [1.3.0] - 2026-11-07
 
 ### Added
 - A program that calls the store without signing in (a webhook, a feed fetcher) is named by its user agent's first
   product, `acme-webhook-invoker/1.2384`, instead of "anonymous". The actor stays anonymous: the name is what the
   caller says. Browsers keep the plain "anonymous" (`Model\Actor\Resolver\CallingAgentActorResolver`).
+- The Activity Log menu declares three groups, each under its heading: **Logs** (code `logs`), **Pages** (`pages`)
+  and **Settings** (`settings`). A channel module puts each of its entries into one of them with the item's `group`
+  key. A group none of whose entries the admin may see is not shown.
+
+### Changed
+- The menu's entries moved into those groups, with sentence-case labels: **Dashboard** and **All activity** (was
+  "All Activity") are under Logs, **Activity log** (was "Configuration") is under Settings. The entries' item names
+  are unchanged, so a layout that moves or removes an entry by name keeps working.
+- Requires `hryvinskyi/magento2-base` ^2.3, the version whose admin menu has groups.
 
 ## [1.2.0] - 2026-10-23
 

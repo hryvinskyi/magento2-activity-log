@@ -25,7 +25,7 @@ class SavedViewFiltersTest extends TestCase
         $cleaned = (new SavedViewFilters())->withoutFilters([
             'current' => [
                 'columns' => $columns,
-                'filters' => ['applied' => ['placeholder' => true, 'channel' => 'admin']],
+                'filters' => ['applied' => ['placeholder' => true, 'channel' => 'zz_one']],
                 'search' => ['value' => 'jane'],
                 'paging' => $paging,
             ],

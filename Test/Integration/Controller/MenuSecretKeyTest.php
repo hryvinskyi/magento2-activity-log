@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Hryvinskyi\ActivityLog\Test\Integration\Controller;
 
+use Hryvinskyi\ActivityLog\Test\Integration\Controller\Fixture\ActivityLogMenu;
 use Hryvinskyi\ActivityLog\Test\Integration\Model\Search\Fixture\SearchFixture;
 use Magento\Backend\Model\UrlInterface;
 use Magento\Framework\App\Route\ConfigInterface as RouteConfig;
@@ -95,18 +96,8 @@ class MenuSecretKeyTest extends AbstractBackendController
      */
     private function menuLinks(string $html): array
     {
-        self::assertSame(
-            1,
-            preg_match('#hryvinskyi-core-menu.*?<ul class="admin__action-dropdown-menu">(.*?)</ul>#s', $html, $menu),
-            'the page prints the Activity Log menu'
-        );
-        preg_match_all('#<a href="([^"]+)"#', $menu[1] ?? '', $hrefs);
-
         return array_values(array_filter(
-            array_map(
-                static fn (string $href): string => html_entity_decode($href, ENT_QUOTES | ENT_HTML5),
-                $hrefs[1]
-            ),
+            (new ActivityLogMenu($html))->links(),
             static fn (string $href): bool => str_contains($href, '/' . self::FRONT_NAME . '/')
         ));
     }

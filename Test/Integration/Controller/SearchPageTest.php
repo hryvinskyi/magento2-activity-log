@@ -169,10 +169,10 @@ class SearchPageTest extends AbstractBackendController
 
     public function testOffersChangesOnlyOnceAChannelRecordsChanges(): void
     {
-        $this->_objectManager->addSharedInstance(new ChangeChannels(['test' => 'admin']), ChangeChannels::class);
+        $this->_objectManager->addSharedInstance(new ChangeChannels(['test' => 'zz_change']), ChangeChannels::class);
         $this->dispatch($this->uri);
 
-        self::assertSame(['admin'], $this->printedConfig('search-config')['changeChannels'] ?? null);
+        self::assertSame(['zz_change'], $this->printedConfig('search-config')['changeChannels'] ?? null);
         self::assertStringContainsString('data-role="changes-only" checked', $this->body());
     }
 

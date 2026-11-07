@@ -284,7 +284,10 @@ Secrets,Secrets
 Retention,Retention
 "Keep Activity of Removed Channels (days)","Keep Activity of Removed Channels (days)"
 "Each channel sets its own retention in its module's settings. This applies to activity whose channel module is no longer installed.","Each channel sets its own retention in its module's settings. This applies to activity whose channel module is no longer installed."
-Configuration,Configuration
+Logs,Logs
+Pages,Pages
+Settings,Settings
+"Activity log","Activity log"
 CSV,CSV
 "Selected activities will be removed from the journal permanently. Linked activities in the same operation are kept.","Selected activities will be removed from the journal permanently. Linked activities in the same operation are kept."
 "Delete activities?","Delete activities?"

@@ -22,20 +22,26 @@ const SCALE = [
 test('operation groups: rows of one operation shown together go oldest first under their trigger', () => {
     const groups = load('model/operation-groups');
     const rows = [
-        {entity_id: '9', correlation_id: 'solo', occurred_at_ms: '5000', channel: 'rest'},
-        {entity_id: '3', correlation_id: 'op1', occurred_at_ms: '1081', channel: 'entity'},
-        {entity_id: '2', correlation_id: 'op1', occurred_at_ms: '1038', channel: 'entity'},
-        {entity_id: '1', correlation_id: 'op1', occurred_at_ms: '1000', channel: 'mcp'},
-        {entity_id: '8', correlation_id: 'other', occurred_at_ms: '900', channel: 'admin'}
+        {entity_id: '9', correlation_id: 'solo', occurred_at_ms: '5000', channel: 'zz_one'},
+        {entity_id: '3', correlation_id: 'op1', occurred_at_ms: '1081', channel: 'zz_change'},
+        {entity_id: '2', correlation_id: 'op1', occurred_at_ms: '1038', channel: 'zz_change'},
+        {entity_id: '1', correlation_id: 'op1', occurred_at_ms: '1000', channel: 'zz_request'},
+        {entity_id: '8', correlation_id: 'other', occurred_at_ms: '900', channel: 'zz_two'}
     ];
 
     const arranged = groups.arrange(rows);
 
     assert.deepEqual(plain(arranged.map((row) => row.entity_id)), ['9', '1', '2', '3', '8']);
     assert.equal(arranged[0].operation, null);
-    assert.deepEqual(plain(arranged[1].operation), {position: 'first', size: 3, triggerChannel: 'mcp', offsetMs: 0});
-    assert.deepEqual(plain(arranged[2].operation), {position: 'middle', size: 3, triggerChannel: 'mcp', offsetMs: 38});
-    assert.deepEqual(plain(arranged[3].operation), {position: 'last', size: 3, triggerChannel: 'mcp', offsetMs: 81});
+    assert.deepEqual(plain(arranged[1].operation),
+        {position: 'first', size: 3, triggerChannel: 'zz_request', offsetMs: 0}
+    );
+    assert.deepEqual(plain(arranged[2].operation),
+        {position: 'middle', size: 3, triggerChannel: 'zz_request', offsetMs: 38}
+    );
+    assert.deepEqual(plain(arranged[3].operation),
+        {position: 'last', size: 3, triggerChannel: 'zz_request', offsetMs: 81}
+    );
     assert.equal(rows[1].operation, undefined, 'the input rows are not changed');
 });
 
@@ -113,12 +119,12 @@ test('criterion event: a search key and a trimmed value of the length the search
     assert.equal(event.detail('request', '   '), null);
     assert.equal(event.detail('request', 42), null, 'values are text');
     assert.equal(event.detail('request', 'x'.repeat(event.MAX_VALUE + 1)), null);
-    assert.deepEqual(plain(event.read({key: 'channel', value: 'entity', extra: true})),
-        {key: 'channel', value: 'entity', alone: false});
+    assert.deepEqual(plain(event.read({key: 'channel', value: 'zz_change', extra: true})),
+        {key: 'channel', value: 'zz_change', alone: false});
     assert.deepEqual(plain(event.read({key: 'request', value: 'op1', alone: true})),
         {key: 'request', value: 'op1', alone: true});
     assert.equal(event.read(null), null);
-    assert.equal(event.read('channel:entity'), null);
+    assert.equal(event.read('channel:zz_change'), null);
 });
 
 test('grid: a cell asks for the whole request alone through the bubbling criterion event; a bad value is not asked', () => {
@@ -139,7 +145,7 @@ test('grid: a cell asks for the whole request alone through the bubbling criteri
     const state = load('search/search-state').withCriterion(
         {chips: [{key: 'by', value: 'john'}], range: {preset: '7d', from: 1, to: 2}, changesOnly: true, view: 'grid'},
         load('search/criterion-event').read(sent[0].detail),
-        {keys: ['by', 'request'], changeChannels: ['entity'], channels: {}}
+        {keys: ['by', 'request'], changeChannels: ['zz_change'], channels: {}}
     );
     assert.deepEqual(plain(state.state.chips), [{key: 'request', value: 'op1'}], 'the request replaces the chips');
     assert.equal(state.state.changesOnly, false);

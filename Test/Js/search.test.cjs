@@ -76,7 +76,7 @@ test('grammar: links carry chips and range, older links still work, bad values a
     assert.deepEqual(plain(grammar.fromUrl('?setting=section/group/enabled&range=30d', KEYS)), {
         chips: [{key: 'setting', value: 'section/group/enabled'}], rangeToken: '30d', dropped: 0
     });
-    assert.deepEqual(plain(grammar.fromUrl('?channel=admin', KEYS).chips), [{key: 'channel', value: 'admin'}]);
+    assert.deepEqual(plain(grammar.fromUrl('?channel=zz_one', KEYS).chips), [{key: 'channel', value: 'zz_one'}]);
     assert.deepEqual(plain(grammar.fromUrl('correlation_id=c7a1e9&actor_name=john&isAjax=true', KEYS)), {
         chips: [{key: 'request', value: 'c7a1e9'}, {key: 'by', value: 'john'}], rangeToken: null, dropped: 0
     });
@@ -295,7 +295,7 @@ function pageBody() {
         }, {
             id: 220900,
             occurredAtMs: 1792671912380,
-            channel: 'admin',
+            channel: 'zz_one',
             correlationId: 'c7a1e9',
             siblingCount: 1,
             actor: {type: 'admin', name: 'john', viaClient: null, viaVersion: null, viaChannel: null},

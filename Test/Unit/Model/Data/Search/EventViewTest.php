@@ -47,8 +47,10 @@ class EventViewTest extends TestCase
     public static function refused(): array
     {
         return [
-            'no id' => [static fn (EventView $view): mixed => $view->withActivity(0, 1, 'admin', 'op-x-0001')],
-            'negative time' => [static fn (EventView $view): mixed => $view->withActivity(1, -1, 'admin', 'op-x-0001')],
+            'no id' => [static fn (EventView $view): mixed => $view->withActivity(0, 1, 'zz_one', 'op-x-0001')],
+            'negative time' => [
+                static fn (EventView $view): mixed => $view->withActivity(1, -1, 'zz_one', 'op-x-0001'),
+            ],
             'negative siblings' => [static fn (EventView $view): mixed => $view->withSiblingCount(-1)],
             'script link' => [static fn (EventView $view): mixed => $view->withDetailUrl('javascript:void(0)')],
         ];

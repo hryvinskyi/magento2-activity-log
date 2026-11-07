@@ -28,8 +28,8 @@ class ActivityTest extends TestCase
 
         $activity = new Activity(
             'a1f3c9e7a1f3c9e7',
-            'mcp',
-            'execute_ability catalog.product_repository.save',
+            'zz_two',
+            'execute_ability acme_shop.widget_repository.save',
             $actor,
             Outcome::Success,
             $origin,
@@ -42,7 +42,7 @@ class ActivityTest extends TestCase
 
         self::assertSame(120431, $activity->getId());
         self::assertSame('a1f3c9e7a1f3c9e7', $activity->getCorrelationId());
-        self::assertSame('mcp', $activity->getChannel());
+        self::assertSame('zz_two', $activity->getChannel());
         self::assertSame(Outcome::Success, $activity->getOutcome());
         self::assertSame($actor, $activity->getActor());
         self::assertSame($subject, $activity->getSubject());
@@ -56,14 +56,14 @@ class ActivityTest extends TestCase
     public static function brokenRules(): array
     {
         return [
-            'short correlation id' => ['abc', 'rest', 'GET /V1/orders', 1, null],
-            'correlation id with spaces' => ['abc def ghi', 'rest', 'GET /V1/orders', 1, null],
-            'uppercase channel' => ['a1f3c9e7', 'REST', 'GET /V1/orders', 1, null],
-            'channel starting with a digit' => ['a1f3c9e7', '1rest', 'GET /V1/orders', 1, null],
-            'blank action' => ['a1f3c9e7', 'rest', '   ', 1, null],
-            'action too long' => ['a1f3c9e7', 'rest', str_repeat('a', 256), 1, null],
-            'zero time' => ['a1f3c9e7', 'rest', 'GET /V1/orders', 0, null],
-            'negative duration' => ['a1f3c9e7', 'rest', 'GET /V1/orders', 1, -1.0],
+            'short correlation id' => ['abc', 'zz_one', 'GET /V1/acme-shop/widgets', 1, null],
+            'correlation id with spaces' => ['abc def ghi', 'zz_one', 'GET /V1/acme-shop/widgets', 1, null],
+            'uppercase channel' => ['a1f3c9e7', 'ZZ_ONE', 'GET /V1/acme-shop/widgets', 1, null],
+            'channel starting with a digit' => ['a1f3c9e7', '1zz_one', 'GET /V1/acme-shop/widgets', 1, null],
+            'blank action' => ['a1f3c9e7', 'zz_one', '   ', 1, null],
+            'action too long' => ['a1f3c9e7', 'zz_one', str_repeat('a', 256), 1, null],
+            'zero time' => ['a1f3c9e7', 'zz_one', 'GET /V1/acme-shop/widgets', 0, null],
+            'negative duration' => ['a1f3c9e7', 'zz_one', 'GET /V1/acme-shop/widgets', 1, -1.0],
         ];
     }
 

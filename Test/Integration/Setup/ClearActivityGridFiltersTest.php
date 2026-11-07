@@ -29,7 +29,7 @@ class ClearActivityGridFiltersTest extends TestCase
         $paging = ['pageSize' => 50, 'current' => 2];
         $current = $this->bookmark(ClearActivityGridFilters::NAMESPACE, 'current', [
             'current' => [
-                'filters' => ['applied' => ['placeholder' => true, 'channel' => 'admin']],
+                'filters' => ['applied' => ['placeholder' => true, 'channel' => 'zz_one']],
                 'search' => ['value' => 'jane'],
                 'paging' => $paging,
             ],
@@ -41,7 +41,7 @@ class ClearActivityGridFiltersTest extends TestCase
             ]],
         ]);
         $otherGrid = $this->bookmark('some_other_listing', 'current', [
-            'current' => ['filters' => ['applied' => ['channel' => 'admin']]],
+            'current' => ['filters' => ['applied' => ['channel' => 'zz_one']]],
         ]);
         $unreadable = $this->bookmark(ClearActivityGridFilters::NAMESPACE, 'broken', null);
 
@@ -54,7 +54,7 @@ class ClearActivityGridFiltersTest extends TestCase
             '{"views":{"mine":{"label":"Mine","data":{"paging":{"pageSize":50,"current":2}}}}}',
             $this->config($view)
         );
-        self::assertSame('{"current":{"filters":{"applied":{"channel":"admin"}}}}', $this->config($otherGrid));
+        self::assertSame('{"current":{"filters":{"applied":{"channel":"zz_one"}}}}', $this->config($otherGrid));
         self::assertSame('{not json', $this->config($unreadable));
     }
 

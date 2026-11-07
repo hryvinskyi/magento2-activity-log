@@ -61,15 +61,15 @@ class ActivityJournalTest extends TestCase
             'id' => '1245',
         ]);
         $activity = $this->builder
-            ->build('rest', 'POST /V1/products', Outcome::Failure, $subject, 642.25, 'Bad Request');
+            ->build('zz_request', 'POST /V1/acme-shop/widgets', Outcome::Failure, $subject, 642.25, 'Bad Request');
 
         $id = $this->recorder->record($activity);
 
         self::assertIsInt($id);
         $stored = $this->repository->get($id);
         self::assertSame($id, $stored->getId());
-        self::assertSame('rest', $stored->getChannel());
-        self::assertSame('POST /V1/products', $stored->getAction());
+        self::assertSame('zz_request', $stored->getChannel());
+        self::assertSame('POST /V1/acme-shop/widgets', $stored->getAction());
         self::assertSame(Outcome::Failure, $stored->getOutcome());
         self::assertSame('Bad Request', $stored->getMessage());
         self::assertSame(642.25, $stored->getDurationMs());
@@ -90,11 +90,13 @@ class ActivityJournalTest extends TestCase
     {
         $operation = $this->correlationScope->begin();
         $first = $this->recorder->record(
-            $this->builder->build('mcp', 'execute_ability catalog.product_repository.save', Outcome::Success)
+            $this->builder->build('zz_request', 'execute_ability acme_shop.widget_repository.save', Outcome::Success)
         );
-        $second = $this->recorder->record($this->builder->build('entity', 'Product saved', Outcome::Success));
+        $second = $this->recorder->record($this->builder->build('zz_change', 'Product saved', Outcome::Success));
         $this->correlationScope->end($operation);
-        $outside = $this->recorder->record($this->builder->build('rest', 'GET /V1/orders', Outcome::Success));
+        $outside = $this->recorder->record(
+            $this->builder->build('zz_request', 'GET /V1/acme-shop/widgets', Outcome::Success)
+        );
 
         $ids = array_map(
             static fn ($activity): ?int => $activity->getId(),
@@ -109,9 +111,9 @@ class ActivityJournalTest extends TestCase
     {
         $operation = $this->correlationScope->begin();
         $kept = $this->recorder->record(
-            $this->builder->build('mcp', 'execute_ability cms.block_repository.save', Outcome::Success)
+            $this->builder->build('zz_request', 'execute_ability acme_shop.widget_repository.save', Outcome::Success)
         );
-        $deleted = $this->recorder->record($this->builder->build('entity', 'Block saved', Outcome::Success));
+        $deleted = $this->recorder->record($this->builder->build('zz_change', 'Widget saved', Outcome::Success));
         $this->correlationScope->end($operation);
         self::assertIsInt($kept);
         self::assertIsInt($deleted);
@@ -126,7 +128,9 @@ class ActivityJournalTest extends TestCase
     #[Config('hryvinskyi_activity_log/general/enabled', '0')]
     public function testNothingIsRecordedWhileTheJournalIsOff(): void
     {
-        self::assertNull($this->recorder->record($this->builder->build('rest', 'GET /V1/orders', Outcome::Success)));
+        self::assertNull(
+            $this->recorder->record($this->builder->build('zz_request', 'GET /V1/acme-shop/widgets', Outcome::Success))
+        );
     }
 
     /**

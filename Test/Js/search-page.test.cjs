@@ -29,8 +29,8 @@ const KEYS = [
 ];
 const KEY_CODES = KEYS.map((description) => description.key);
 const CHANNELS = {
-    admin: {label: 'Admin request', bg: '#fff', fg: '#000'},
-    entity: {label: 'Entity change', bg: '#fff', fg: '#000'}
+    zz_one: {label: 'Plain channel', bg: '#fff', fg: '#000'},
+    zz_change: {label: 'Change channel', bg: '#fff', fg: '#000'}
 };
 
 const WORDS = {
@@ -47,7 +47,7 @@ const WORDS = {
     groups: {fields: 'Fields', records: 'Records', people: 'People & clients', types: 'Entity types', other: 'Other'}
 };
 
-const opening = (search, preferences = {view: 'timeline', changesOnly: true}, changeChannels = ['entity']) =>
+const opening = (search, preferences = {view: 'timeline', changesOnly: true}, changeChannels = ['zz_change']) =>
     load('search/search-state').initial({
         search: search,
         keys: KEY_CODES,
@@ -65,13 +65,13 @@ test('page state: a link opens on its chips and range; the menu links open on wh
     assert.equal(plainLink.changesOnly, true);
     assert.equal(plainLink.view, 'timeline');
 
-    const admin = opening('?channel=admin');
-    assert.deepEqual(plain(admin.chips), [{key: 'channel', value: 'admin'}]);
-    assert.equal(admin.changesOnly, false, 'admin requests carry no diff, so "Changes only" would hide all of them');
+    const plainChannel = opening('?channel=zz_one');
+    assert.deepEqual(plain(plainChannel.chips), [{key: 'channel', value: 'zz_one'}]);
+    assert.equal(plainChannel.changesOnly, false, 'a channel with no diff would be hidden by "Changes only"');
 
-    const entity = opening('?channel=entity');
-    assert.equal(entity.changesOnly, true, 'a channel that records changes keeps the admin\'s choice');
-    assert.equal(opening('?channel=Entity%20change').changesOnly, true, 'a channel is known by its label too');
+    const changeChannel = opening('?channel=zz_change');
+    assert.equal(changeChannel.changesOnly, true, 'a channel that records changes keeps the admin\'s choice');
+    assert.equal(opening('?channel=Change%20channel').changesOnly, true, 'a channel is known by its label too');
 
     const request = opening('?correlation_id=c7a1e9&range=30d');
     assert.deepEqual(plain(request.chips), [{key: 'request', value: 'c7a1e9'}], 'the old link parameter still works');
@@ -118,7 +118,7 @@ test('page state: requests take the range up to now; the grid and the link get t
 
 test('page state: a filter another part of the page asks for obeys the grammar and may switch changes-only off', () => {
     const state = load('search/search-state');
-    const context = {keys: KEY_CODES, changeChannels: ['entity'], channels: CHANNELS};
+    const context = {keys: KEY_CODES, changeChannels: ['zz_change'], channels: CHANNELS};
     const opened = opening('?by=jane');
 
     const byRequest = state.withCriterion(opened, {key: 'request', value: 'c7a1e9'}, context);
@@ -263,7 +263,7 @@ test('page config: the printed config is checked before the page uses it', () =>
         suggestUrl: 'https://shop.test/admin/activitylog/activity/suggest/key/abc/',
         preferenceUrl: '/admin/activitylog/activity/savePreference/key/abc/',
         formKey: 'fk', timeZone: 'Europe/Copenhagen', locale: 'en_GB', serverNowMs: NOW, timeoutMs: 20000,
-        keys: KEYS, channels: CHANNELS, changeChannels: ['entity'],
+        keys: KEYS, channels: CHANNELS, changeChannels: ['zz_change'],
         preferences: {view: 'grid', changesOnly: false},
         examples: [{title: 'Prices', chips: [{key: 'field', value: 'price'}], preset: '30d'}],
         grid: {provider: 'p', paging: 'g', selections: 's', exportButton: 'e', exportOption: 'csv',
@@ -522,7 +522,7 @@ const PANEL = [
     ]},
     {key: 'field', select: false, companion: false, options: []},
     {key: 'by', select: false, companion: false, options: []},
-    {key: 'channel', select: true, companion: false, options: [{value: 'admin', target: ''}]}
+    {key: 'channel', select: true, companion: false, options: [{value: 'zz_one', target: ''}]}
 ];
 const panelValues = (entity, id, rest = {}) => ({
     fields: Object.assign({entity: entity, field: '', by: '', channel: ''}, rest),
@@ -543,8 +543,8 @@ test('panel model: an id typed beside a kind of record becomes a chip of that ki
         [{key: 'text', value: '1245'}], 'an id with no kind is searched as text');
     assert.deepEqual(plain(panel.apply([], panelValues('cart_price_rule', ''), PANEL).chips),
         [{key: 'entity', value: 'cart_price_rule'}], 'a kind alone filters by the kind');
-    assert.deepEqual(plain(panel.apply([], panelValues('', '', {field: 'price', by: 'jane', channel: 'admin'}), PANEL)
-        .chips), [{key: 'field', value: 'price'}, {key: 'by', value: 'jane'}, {key: 'channel', value: 'admin'}]);
+    assert.deepEqual(plain(panel.apply([], panelValues('', '', {field: 'price', by: 'jane', channel: 'zz_one'}), PANEL)
+        .chips), [{key: 'field', value: 'price'}, {key: 'by', value: 'jane'}, {key: 'channel', value: 'zz_one'}]);
 
     const replaced = panel.apply(
         [{key: 'product', value: 'old'}, {key: 'entity', value: 'product'}, {key: 'rule', value: 'x'},
@@ -569,9 +569,9 @@ test('panel model: only the controls the admin changed replace chips; two chips 
 
     assert.deepEqual(plain(panel.apply(chips, shown, PANEL).chips), chips, 'applying the panel untouched keeps every chip');
     assert.deepEqual(
-        plain(panel.apply(chips, {fields: Object.assign({}, shown.fields, {channel: 'admin'}),
+        plain(panel.apply(chips, {fields: Object.assign({}, shown.fields, {channel: 'zz_one'}),
             companions: shown.companions}, PANEL).chips),
-        chips.concat([{key: 'channel', value: 'admin'}]),
+        chips.concat([{key: 'channel', value: 'zz_one'}]),
         'a channel chosen joins the chips; both actors stay'
     );
     assert.deepEqual(
@@ -613,7 +613,7 @@ test('filters panel: shows the chips, keeps values a select does not list, appli
             el('option', {value: 'admin_user'})
         ]),
         el('input', {'data-companion-of': 'entity'}),
-        el('select', {'data-filter-key': 'channel'}, [el('option', {value: ''}), el('option', {value: 'admin'})]),
+        el('select', {'data-filter-key': 'channel'}, [el('option', {value: ''}), el('option', {value: 'zz_one'})]),
         el('input', {'data-filter-key': 'by'}),
         el('span', {'data-role': 'panel-error', hidden: true}),
         el('button', {'data-role': 'panel-cancel'}),
@@ -635,16 +635,16 @@ test('filters panel: shows the chips, keeps values a select does not list, appli
     const select = panel.querySelector('[data-filter-key="channel"]');
     const by = panel.querySelector('[data-filter-key="by"]');
 
-    filters.sync([{key: 'by', value: 'jane'}, {key: 'channel', value: 'Admin request'}, {key: 'product', value: '1245'}]);
+    filters.sync([{key: 'by', value: 'jane'}, {key: 'channel', value: 'Plain channel'}, {key: 'product', value: '1245'}]);
     fire(toggle, 'click');
     assert.equal(panel.hidden, false);
     assert.equal(toggle.getAttribute('aria-expanded'), 'true');
     assert.deepEqual([entity.value, id.value, by.value], ['product', '1245', 'jane'], 'the panel shows the chips');
-    assert.equal(select.value, 'Admin request');
+    assert.equal(select.value, 'Plain channel');
     assert.equal(select.options.length, 3, 'a chip value the select does not list is added, so applying keeps it');
 
-    filters.sync([{key: 'channel', value: 'admin'}]);
-    assert.deepEqual([entity.value, id.value, by.value, select.value, select.options.length], ['', '', '', 'admin', 2],
+    filters.sync([{key: 'channel', value: 'zz_one'}]);
+    assert.deepEqual([entity.value, id.value, by.value, select.value, select.options.length], ['', '', '', 'zz_one', 2],
         'the panel follows the bar');
 
     by.value = 'x'.repeat(300);
@@ -657,7 +657,7 @@ test('filters panel: shows the chips, keeps values a select does not list, appli
     entity.value = 'product';
     id.value = '24-MB01';
     fire(panel.querySelector('[data-role="panel-apply"]'), 'click');
-    assert.deepEqual(applied[0], [{key: 'channel', value: 'admin'}, {key: 'product', value: '24-MB01'},
+    assert.deepEqual(applied[0], [{key: 'channel', value: 'zz_one'}, {key: 'product', value: '24-MB01'},
         {key: 'by', value: 'erp'}], 'the chip of the control left alone stays; the changed controls\' follow');
     assert.equal(panel.hidden, true);
     assert.equal(doc.activeElement, toggle, 'after Apply the focus goes back to the Filters button');
@@ -666,16 +666,16 @@ test('filters panel: shows the chips, keeps values a select does not list, appli
     id.value = '';
     by.value = 'ann';
     fire(by, 'keydown', {key: 'Enter'});
-    assert.deepEqual(applied[1], [{key: 'channel', value: 'admin'}, {key: 'entity', value: 'product'},
+    assert.deepEqual(applied[1], [{key: 'channel', value: 'zz_one'}, {key: 'entity', value: 'product'},
         {key: 'by', value: 'ann'}], 'Enter in a text box applies; a kind alone filters by the kind');
     assert.equal(doc.activeElement, toggle);
 
     filters.sync([{key: 'by', value: 'jane'}, {key: 'by', value: 'joe'}]);
     fire(toggle, 'click');
-    select.value = 'admin';
+    select.value = 'zz_one';
     fire(panel.querySelector('[data-role="panel-apply"]'), 'click');
     assert.deepEqual(applied[2], [{key: 'by', value: 'jane'}, {key: 'by', value: 'joe'},
-        {key: 'channel', value: 'admin'}], 'two chips of one key stay when the admin changes another control');
+        {key: 'channel', value: 'zz_one'}], 'two chips of one key stay when the admin changes another control');
 
     fire(toggle, 'click');
     fire(panel, 'keydown', {key: 'Escape'});

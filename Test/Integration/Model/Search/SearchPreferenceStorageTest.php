@@ -34,13 +34,13 @@ class SearchPreferenceStorageTest extends TestCase
         self::assertSame(['view' => null, 'changesOnly' => null], $search->load(), 'nothing chosen yet');
 
         $search->save(ResultView::Grid, false);
-        $dashboard->save(30, ['admin']);
+        $dashboard->save(30, ['zz_one']);
         self::assertSame(['view' => ResultView::Grid, 'changesOnly' => false], $search->load());
-        self::assertSame(['periodDays' => 30, 'channels' => ['admin']], $dashboard->load());
+        self::assertSame(['periodDays' => 30, 'channels' => ['zz_one']], $dashboard->load());
 
         $search->save(ResultView::Timeline, true);
         self::assertSame(['view' => ResultView::Timeline, 'changesOnly' => true], $search->load(), 'replaced');
-        self::assertSame(['periodDays' => 30, 'channels' => ['admin']], $dashboard->load(), 'the dashboard\'s stays');
+        self::assertSame(['periodDays' => 30, 'channels' => ['zz_one']], $dashboard->load(), 'the dashboard\'s stays');
 
         self::assertSame(['view' => null, 'changesOnly' => null], $this->searchStorage(null)->load());
         $this->searchStorage(null)->save(ResultView::Grid, true);

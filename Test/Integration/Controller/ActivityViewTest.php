@@ -32,15 +32,15 @@ class ActivityViewTest extends AbstractBackendController
 
     public function testShowsTheActivityAndTheRestOfItsOperation(): void
     {
-        $trigger = $this->insert('op-view0001', 'mcp', 'execute_ability cms.block_repository.save', 1000);
-        $change = $this->insert('op-view0001', 'entity', 'Block saved', 1038);
+        $trigger = $this->insert('op-view0001', 'zz_request', 'execute_ability acme_shop.widget_repository.save', 1000);
+        $change = $this->insert('op-view0001', 'zz_change', 'Widget saved', 1038);
 
         $this->dispatch('backend/activitylog/activity/view/id/' . $change);
         $html = $this->body();
 
-        self::assertStringContainsString('Block saved', $html);
+        self::assertStringContainsString('Widget saved', $html);
         self::assertStringContainsString('Same operation', $html);
-        self::assertStringContainsString('execute_ability cms.block_repository.save', $html);
+        self::assertStringContainsString('execute_ability acme_shop.widget_repository.save', $html);
         self::assertStringContainsString('activitylog/activity/view/id/' . $trigger, $html);
         self::assertStringContainsString('+38 ms', $html);
         foreach (['arrow-left', 'trash-2', 'link'] as $icon) {
@@ -59,8 +59,8 @@ class ActivityViewTest extends AbstractBackendController
 
     public function testDeletingKeepsTheRestOfTheOperation(): void
     {
-        $kept = $this->insert('op-view0002', 'mcp', 'execute_ability cms.block_repository.save', 1000);
-        $deleted = $this->insert('op-view0002', 'entity', 'Block saved', 1038);
+        $kept = $this->insert('op-view0002', 'zz_request', 'execute_ability acme_shop.widget_repository.save', 1000);
+        $deleted = $this->insert('op-view0002', 'zz_change', 'Widget saved', 1038);
 
         $this->httpRequest()->setMethod(HttpRequest::METHOD_POST);
         $this->dispatch('backend/activitylog/activity/delete/id/' . $deleted);

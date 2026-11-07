@@ -330,7 +330,7 @@ test('sentence: fields compared without recorded rows are a number only', () => 
 test('sentence: an activity no module describes says what it performed', () => {
     const sentence = load('search/sentence');
     const model = plain(sentence.build(event({
-        channel: 'admin',
+        channel: 'zz_one',
         verb: 'performed',
         action: 'section/item/save',
         outcome: 'denied',

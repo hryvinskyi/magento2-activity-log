@@ -35,7 +35,7 @@ class ActivityStatisticsTest extends TestCase
         $this->insert(
             'op-aaaaaaaa',
             'assistant',
-            'ask catalog.product.save',
+            'ask acme_shop.widget.save',
             'success',
             412.0,
             2,
@@ -48,7 +48,7 @@ class ActivityStatisticsTest extends TestCase
         $this->insert(
             'op-dddddddd',
             'assistant',
-            'ask catalog.product.delete',
+            'ask acme_shop.widget.delete',
             'denied',
             12.0,
             50,
@@ -118,7 +118,7 @@ class ActivityStatisticsTest extends TestCase
             $actors[1]['count'],
             $actors[1]['failures'],
         ]);
-        self::assertSame(['ask catalog.product.delete'], array_column($denied, 'action'));
+        self::assertSame(['ask acme_shop.widget.delete'], array_column($denied, 'action'));
     }
 
     public function testTheGridKnowsHowManyActivitiesShareEachOperationOfAPageItReads(): void

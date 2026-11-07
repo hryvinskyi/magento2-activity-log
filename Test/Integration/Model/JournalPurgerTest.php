@@ -31,8 +31,8 @@ class JournalPurgerTest extends TestCase
 {
     private const NOW_MS = 1792500000000;
     private const DAY_MS = 86_400_000;
-    private const REST_RETENTION = 'test_channels/rest/retention';
-    private const ADMIN_RETENTION = 'test_channels/admin/retention';
+    private const ONE_RETENTION = 'test_channels/zz_one/retention';
+    private const TWO_RETENTION = 'test_channels/zz_two/retention';
 
     /**
      * Start from an empty journal: the purger works on the whole table, and rows other tests committed would be
@@ -44,29 +44,29 @@ class JournalPurgerTest extends TestCase
         $resource->getConnection()->delete($resource->getTableName(ActivityResource::TABLE));
     }
 
-    #[Config(self::REST_RETENTION, '30')]
-    #[Config(self::ADMIN_RETENTION, '90')]
+    #[Config(self::ONE_RETENTION, '30')]
+    #[Config(self::TWO_RETENTION, '90')]
     #[Config('hryvinskyi_activity_log/retention/orphan_days', '10')]
     public function testEachChannelKeepsItsOwnRetentionAndUnregisteredChannelsTheOrphanOne(): void
     {
-        $restOld = $this->insert('rest', 31);
-        $restRecent = $this->insert('rest', 29);
-        $adminMiddle = $this->insert('admin', 60);
-        $adminOld = $this->insert('admin', 91);
-        $selfManaged = $this->insert('entity', 400);
+        $oneOld = $this->insert('zz_one', 31);
+        $oneRecent = $this->insert('zz_one', 29);
+        $twoMiddle = $this->insert('zz_two', 60);
+        $twoOld = $this->insert('zz_two', 91);
+        $selfManaged = $this->insert('zz_self_managed', 400);
         $orphanOld = $this->insert('uninstalled', 11);
         $orphanRecent = $this->insert('uninstalled', 9);
 
         $removed = $this->purger([
-            'rest' => $this->channel('rest', self::REST_RETENTION),
-            'admin' => $this->channel('admin', self::ADMIN_RETENTION),
-            'entity' => $this->channel('entity', ''),
+            'zz_one' => $this->channel('zz_one', self::ONE_RETENTION),
+            'zz_two' => $this->channel('zz_two', self::TWO_RETENTION),
+            'zz_self_managed' => $this->channel('zz_self_managed', ''),
         ])->purge();
 
         self::assertSame(3, $removed);
         self::assertSame(
-            [$restRecent, $adminMiddle, $selfManaged, $orphanRecent],
-            $this->remaining([$restOld, $restRecent, $adminMiddle, $adminOld, $selfManaged, $orphanOld, $orphanRecent])
+            [$oneRecent, $twoMiddle, $selfManaged, $orphanRecent],
+            $this->remaining([$oneOld, $oneRecent, $twoMiddle, $twoOld, $selfManaged, $orphanOld, $orphanRecent])
         );
     }
 
@@ -85,13 +85,13 @@ class JournalPurgerTest extends TestCase
 
     public function testThePrunerRemovesOnlyTheChannelAndSubjectTypesAskedFor(): void
     {
-        $productOld = $this->insert('entity', 40, 'product');
-        $productRecent = $this->insert('entity', 20, 'product');
-        $blockOld = $this->insert('entity', 40, 'cms_block');
-        $otherChannel = $this->insert('admin', 40, 'product');
+        $productOld = $this->insert('zz_self_managed', 40, 'product');
+        $productRecent = $this->insert('zz_self_managed', 20, 'product');
+        $blockOld = $this->insert('zz_self_managed', 40, 'acme_widget');
+        $otherChannel = $this->insert('zz_two', 40, 'product');
 
         $removed = self::service(ActivityPrunerInterface::class)
-            ->prune('entity', self::NOW_MS - 30 * self::DAY_MS, ['product']);
+            ->prune('zz_self_managed', self::NOW_MS - 30 * self::DAY_MS, ['product']);
 
         self::assertSame(1, $removed);
         self::assertSame(
@@ -100,7 +100,7 @@ class JournalPurgerTest extends TestCase
         );
         self::assertSame(
             1,
-            self::service(ActivityPrunerInterface::class)->prune('entity', self::NOW_MS - 30 * self::DAY_MS)
+            self::service(ActivityPrunerInterface::class)->prune('zz_self_managed', self::NOW_MS - 30 * self::DAY_MS)
         );
     }
 

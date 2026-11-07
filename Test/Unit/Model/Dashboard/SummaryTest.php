@@ -67,7 +67,7 @@ class SummaryTest extends TestCase
      */
     private function cards(array $now, array $before): array
     {
-        $query = new DashboardQuery(7, ['rest'], self::NOW_MS);
+        $query = new DashboardQuery(7, ['zz_one'], self::NOW_MS);
         $statistics = $this->createStub(ActivityStatisticsInterface::class);
         $statistics->method('totals')->willReturnCallback(
             static fn (array $channels, int $fromMs): array => $fromMs === $query->getFromMs() ? $now : $before

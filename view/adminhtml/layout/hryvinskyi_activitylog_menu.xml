@@ -8,7 +8,10 @@
 -->
 <!--
     The Activity Log menu. A channel module adds its own entries by shipping a layout file of this handle that
-    adds items to the "items" argument of the block below.
+    adds items to the "items" argument of the block below. Every entry names one of the groups declared here by
+    its code in the item's "group" key: "logs" for what was recorded, "pages" for the module's own admin pages,
+    "settings" for its configuration section. Labels are sentence case; an entry in Settings does not repeat the
+    word "settings".
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
@@ -20,23 +23,40 @@
             <block class="Hryvinskyi\Base\Block\Adminhtml\Menu" name="hryvinskyi.activity.log.menu">
                 <arguments>
                     <argument name="menu_title" xsi:type="string" translate="true">Activity Log</argument>
+                    <argument name="groups" xsi:type="array">
+                        <item name="logs" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">Logs</item>
+                            <item name="sort_order" xsi:type="number">10</item>
+                        </item>
+                        <item name="pages" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">Pages</item>
+                            <item name="sort_order" xsi:type="number">20</item>
+                        </item>
+                        <item name="settings" xsi:type="array">
+                            <item name="label" xsi:type="string" translate="true">Settings</item>
+                            <item name="sort_order" xsi:type="number">30</item>
+                        </item>
+                    </argument>
                     <argument name="items" xsi:type="array">
                         <item name="dashboard" xsi:type="array">
                             <item name="label" xsi:type="string" translate="true">Dashboard</item>
+                            <item name="group" xsi:type="string">logs</item>
                             <item name="route" xsi:type="string">hryvinskyi_activitylog/dashboard/index</item>
                             <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::dashboard</item>
                             <item name="sort_order" xsi:type="number">5</item>
                             <item name="icon" xsi:type="string"><![CDATA[<svg aria-hidden="true" focusable="false" class="menu-item-icon lucide lucide-layout-dashboard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>]]></item>
                         </item>
                         <item name="all_activity" xsi:type="array">
-                            <item name="label" xsi:type="string" translate="true">All Activity</item>
+                            <item name="label" xsi:type="string" translate="true">All activity</item>
+                            <item name="group" xsi:type="string">logs</item>
                             <item name="route" xsi:type="string">hryvinskyi_activitylog/activity/index</item>
                             <item name="resource" xsi:type="string">Hryvinskyi_ActivityLog::view</item>
                             <item name="sort_order" xsi:type="number">10</item>
                             <item name="icon" xsi:type="string"><![CDATA[<svg aria-hidden="true" focusable="false" class="menu-item-icon lucide lucide-list" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg>]]></item>
                         </item>
                         <item name="configuration" xsi:type="array">
-                            <item name="label" xsi:type="string" translate="true">Configuration</item>
+                            <item name="label" xsi:type="string" translate="true">Activity log</item>
+                            <item name="group" xsi:type="string">settings</item>
                             <item name="route" xsi:type="string">adminhtml/system_config/edit</item>
                             <item name="route_params" xsi:type="array">
                                 <item name="section" xsi:type="string">hryvinskyi_activity_log</item>

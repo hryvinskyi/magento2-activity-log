@@ -16,7 +16,7 @@ class DashboardQueryTest extends TestCase
 {
     public function testThePreviousPeriodEndsWhereThisOneStarts(): void
     {
-        $query = new DashboardQuery(14, ['rest', 'mcp'], 1792500000000);
+        $query = new DashboardQuery(14, ['zz_one', 'zz_two'], 1792500000000);
 
         self::assertSame(1792500000000 - 14 * 86_400_000, $query->getFromMs());
         self::assertSame(
@@ -29,7 +29,7 @@ class DashboardQueryTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new DashboardQuery(10, ['rest'], 1792500000000);
+        new DashboardQuery(10, ['zz_one'], 1792500000000);
     }
 
     public function testRefusesNoChannels(): void
@@ -43,6 +43,6 @@ class DashboardQueryTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new DashboardQuery(7, ["rest' OR 1=1"], 1792500000000);
+        new DashboardQuery(7, ["zz_one' OR 1=1"], 1792500000000);
     }
 }

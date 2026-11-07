@@ -17,11 +17,14 @@ const WORDING = {label: 'Label', total: 'Total'};
 
 test('channel selection: toggles in chip order and never switches the last one off', () => {
     const selection = load('dashboard/channel-selection');
-    const order = ['rest', 'admin', 'entity', 'mcp'];
+    const order = ['zz_one', 'zz_two', 'zz_change', 'zz_request'];
 
-    assert.deepEqual(plain(selection.toggle(order, ['mcp', 'rest'], 'admin')), ['rest', 'admin', 'mcp']);
-    assert.deepEqual(plain(selection.toggle(order, ['rest', 'mcp'], 'rest')), ['mcp']);
-    assert.deepEqual(plain(selection.toggle(order, ['mcp'], 'mcp')), ['mcp']);
+    assert.deepEqual(
+        plain(selection.toggle(order, ['zz_request', 'zz_one'], 'zz_two')),
+        ['zz_one', 'zz_two', 'zz_request']
+    );
+    assert.deepEqual(plain(selection.toggle(order, ['zz_one', 'zz_request'], 'zz_one')), ['zz_request']);
+    assert.deepEqual(plain(selection.toggle(order, ['zz_request'], 'zz_request')), ['zz_request']);
 });
 
 test('chart table: one row per label, a column per series, a total when stacked', () => {
@@ -29,11 +32,14 @@ test('chart table: one row per label, a column per series, a total when stacked'
 
     const table = chartTable.toTable({
         labels: ['Oct 14', 'Oct 15'],
-        datasets: [{label: 'REST API', values: [3, 4]}, {label: 'MCP', values: [1, 0]}],
+        datasets: [{label: 'Series one', values: [3, 4]}, {label: 'Series two', values: [1, 0]}],
         stacked: true
     }, WORDING);
 
-    assert.deepEqual(plain(table.columns.map((column) => column.label)), ['Label', 'REST API', 'MCP', 'Total']);
+    assert.deepEqual(
+        plain(table.columns.map((column) => column.label)),
+        ['Label', 'Series one', 'Series two', 'Total']
+    );
     assert.equal(table.rows.length, 2);
     assert.equal(table.rows[0].cells.label, 'Oct 14');
     assert.equal(table.rows[0].cells.total, (4).toLocaleString());
@@ -43,7 +49,7 @@ test('chart config: horizontal bars put labels on the y axis and keep the unit i
     const chartConfig = load('dashboard/chart-config');
 
     const config = chartConfig.build({
-        labels: ['POST /V1/products'],
+        labels: ['POST /V1/acme-shop/widgets'],
         datasets: [{label: 'Average duration', color: ['#C8372D'], values: [1380]}],
         horizontal: true,
         unit: 'ms'
@@ -59,7 +65,7 @@ test('response parser: accepts the server shape and refuses anything else', () =
     const parser = load('dashboard/response-parser');
     const good = {
         periodDays: 7,
-        channels: ['rest'],
+        channels: ['zz_one'],
         summary: [{
             key: 'total', label: 'Total', value: '3', unit: '', delta: '+1%', direction: 'up', tone: 'good', empty: false
         }],
