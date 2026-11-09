@@ -1,0 +1,168 @@
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+
+/*
+ * The split diff table drawn by Hryvinskyi_ActivityLog/js/view/split-diff: line numbers and text on each side,
+ * removed lines light red, added lines light green, the words that changed in a darker shade. A long line is shown in
+ * full and wraps; nothing is clipped. Self-contained: it sets its own font and line height whatever the host sets,
+ * and its cell rules are at least as specific as 0,3,2 (`.split-diff tbody .split-diff__row > td.split-diff__num`),
+ * so a host's table rules up to that specificity, such as a form's `.a .b .c td` padding, do not reach its cells.
+ */
+
+.split-diff {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    color: #1f2328;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: left;
+}
+
+.split-diff__col-num {
+    width: 4em;
+}
+
+.split-diff tr[hidden] {
+    display: none;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__num,
+.split-diff tbody .split-diff__row > td.split-diff__code {
+    height: 20px;
+    padding: 0 8px;
+    border: 0;
+    vertical-align: top;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__num {
+    padding: 0 6px;
+    color: #6e7781;
+    text-align: right;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    tab-size: 4;
+}
+
+/* The line between the two sides: the after side's number cell */
+.split-diff tbody .split-diff__row > td.split-diff__num:nth-child(3) {
+    border-left: 1px solid #d0d7de;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__num--delete {
+    background: #ffd7d5;
+    color: #1f2328;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__code--delete {
+    background: #ffebe9;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__num--insert {
+    background: #ccffd8;
+    color: #1f2328;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__code--insert {
+    background: #e6ffec;
+}
+
+.split-diff tbody .split-diff__row > td.split-diff__num--empty,
+.split-diff tbody .split-diff__row > td.split-diff__code--empty {
+    background: #f6f8fa;
+}
+
+.split-diff del,
+.split-diff ins {
+    color: inherit;
+    text-decoration: none;
+}
+
+.split-diff .split-diff__line {
+    background: none;
+}
+
+.split-diff del.split-diff__word {
+    background: rgba(255, 129, 130, 0.4);
+    border-radius: 2px;
+}
+
+.split-diff ins.split-diff__word {
+    background: #abf2bc;
+    border-radius: 2px;
+}
+
+/* Text read out by a screen reader and left out of what a person sees and copies */
+.split-diff__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    user-select: none;
+}
+
+/* The fold's label starts where the text of the lines starts: after the number column and the text's own padding */
+.split-diff tbody tr.split-diff__fold > td.split-diff__fold-cell {
+    height: 20px;
+    padding: 0 8px 0 calc(4em + 8px);
+    vertical-align: middle;
+    border: 0;
+    background: #ddf4ff;
+    color: #0969da;
+}
+
+.split-diff__row:focus-visible {
+    outline: 2px solid #0969da;
+    outline-offset: -2px;
+}
+
+/* The admin theme paints every button on hover, focus and press; the fold's button keeps the look of a link */
+.split-diff .split-diff__fold-button,
+.split-diff .split-diff__fold-button:hover,
+.split-diff .split-diff__fold-button:focus,
+.split-diff .split-diff__fold-button:active {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: none;
+    box-shadow: none;
+    color: #0969da;
+    font: inherit;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+.split-diff .split-diff__fold-button:hover {
+    text-decoration: underline;
+}
+
+.split-diff .split-diff__fold-button:focus {
+    outline: none;
+}
+
+.split-diff .split-diff__fold-button:focus-visible {
+    outline: 2px solid #0969da;
+    outline-offset: 2px;
+}

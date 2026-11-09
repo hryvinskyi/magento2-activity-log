@@ -12,8 +12,8 @@ namespace Hryvinskyi\ActivityLog\Api\Data\Search;
 /**
  * How the before and after values of a changed field are shown
  *
- * Short values sit inline; long text is shown as a word-level diff; JSON arrays as added, removed and unchanged
- * items; masked values are never shown, only marked.
+ * Short values sit inline; long text is shown as a split diff of its lines with the changed words marked; JSON
+ * arrays as added, removed and unchanged items; masked values are never shown, only marked.
  *
  * @api
  */

@@ -34,8 +34,8 @@ function timelineConfig() {
         changeOne: 'change', changeMany: 'changes', showingOf: 'Showing %1 of %2', atLeast: '%1+',
         loadMore: 'Load %1 more', loadedOf: 'Loaded %1 of %2', newestFirst: 'newest first',
         noResultsTitle: 'No changes match in %1', outsideMany: '%1 matching changes are outside. The latest is %2.',
-        narrow: 'Only the newest %1 were searched.', showFullDiff: 'Show full diff', collapse: 'Collapse',
-        longMeta: '%1 → %2 chars · %3 edits', jsonMeta: '%1 added · %2 removed · %3 unchanged',
+        narrow: 'Only the newest %1 were searched.', foldLines: 'Show %1 unchanged lines', noLine: 'No line',
+        longMeta: '%1 → %2 chars · %3 edits', longMetaOne: '%1 → %2 chars · %3 edit', jsonMeta: '%1 added · %2 removed · %3 unchanged',
         showUnchanged: 'Show unchanged', hideUnchanged: 'Hide unchanged',
         unchangedOne: '%1 unchanged field recorded', unchangedMany: '%1 unchanged fields recorded',
         unchangedCountOne: '%1 other field unchanged', unchangedCountMany: '%1 other fields unchanged',
@@ -366,10 +366,22 @@ test('timeline: a record created names its field count, and in a locale writing 
     assert.equal(t.slot('clock', t.root.querySelector('[data-activity="2"]')).textContent, '12:05:09');
 });
 
-test('timeline: rows for several fields — word diff, JSON items, masked, unchanged — each expands in place', async () => {
+/**
+ * @param {number} count
+ * @returns {string} Lines "line 1" … "line <count>", each ending in a line break
+ */
+const leadingLines = (count) => Array.from({length: count}, (unused, index) => 'line ' + (index + 1) + '\n').join('');
+
+/**
+ * @param {Object} row a split-diff table row
+ * @returns {boolean} Whether a person sees it
+ */
+const isShown = (row) => !row.hidden && !row.parentNode.hidden;
+
+test('timeline: rows for several fields — split diff, JSON items, masked, unchanged — each expands in place', async () => {
     const t = mounted();
-    const longBefore = 'The quick brown fox jumps';
-    const longAfter = 'The quick red fox jumps high';
+    const longBefore = leadingLines(10) + 'The quick brown fox jumps';
+    const longAfter = leadingLines(10) + 'The quick red fox jumps high';
 
     t.timeline.show(Object.assign({}, SEARCH, {chips: [{key: 'field', value: 'price'}]}));
     t.search.calls[0].resolve(resultPage({
@@ -404,17 +416,30 @@ test('timeline: rows for several fields — word diff, JSON items, masked, uncha
     assert.equal(t.slot('value', rows.children[0]).textContent, '34.00 → 39.00');
 
     const long = rows.children[1];
-    assert.equal(t.slot('value', long).querySelector('[data-part="long"]').textContent,
-        'The quick brownred fox jumps high');
-    assert.ok(t.slot('value', long).textContent.includes('2,100 → 2,240 chars · 3 edits'));
+    const table = t.slot('value', long).querySelector('table.split-diff');
+    assert.ok(table, 'long text is drawn as a split diff');
+    const changed = table.querySelectorAll('tr.split-diff__row--change');
+    assert.equal(changed.length, 1, 'the one changed line, its before beside its after');
+    assert.deepEqual(changed[0].children.map((cell) => cell.textContent),
+        ['11', 'The quick brown fox jumps', '11', 'The quick red fox jumps high']);
+    assert.deepEqual(changed[0].querySelectorAll('del').map((word) => word.textContent), ['brown']);
+    assert.deepEqual(changed[0].querySelectorAll('ins').map((word) => word.textContent), ['red', ' high'],
+        'the words that changed are marked inside the line');
+    assert.match(t.slot('value', long).textContent, /2,100 → 2,240 chars · 1 edit(?!s)/,
+        'the line under the value gives the lengths and the changed stretches of the split diff, one in the singular');
     assert.ok(t.slot('value', long).textContent.includes('truncated'), 'a value cut for transport says so');
-    const diffButton = long.querySelector('[data-action="diff"]');
-    fire(diffButton, 'click');
-    assert.equal(diffButton.getAttribute('aria-expanded'), 'true');
-    assert.equal(diffButton.textContent, 'Collapse');
-    assert.equal(long.querySelector('[data-part="long"]').classList.contains('activity-stream__long--full'), true);
-    fire(diffButton, 'click');
-    assert.equal(diffButton.textContent, 'Show full diff');
+    assert.equal(long.querySelector('[data-action="diff"]'), null, 'nothing clips the value, so nothing unclips it');
+
+    const fold = table.querySelector('[data-action="fold"]');
+    assert.equal(fold.textContent, 'Show 7 unchanged lines', 'three lines of context stay above the change');
+    const folded = table.querySelector('tbody.split-diff__fold-group').querySelectorAll('tr.split-diff__row');
+    assert.equal(folded.length, 7);
+    assert.equal(folded.some(isShown), false, 'the folded lines are hidden');
+    fire(fold, 'click');
+    assert.equal(folded.every(isShown), true, 'a click on the fold, answered through the timeline, opens it in place');
+    assert.equal(isShown(fold.closest('tr')), false, 'the fold\'s own row is hidden');
+    assert.equal(t.doc.activeElement, folded[0], 'the focus moves to the first line shown');
+    assert.deepEqual(folded[0].children.map((cell) => cell.textContent), ['1', 'line 1', '1', 'line 1']);
 
     const json = rows.children[2];
     assert.equal(t.slot('scope', json).hidden, true);
@@ -441,6 +466,70 @@ test('timeline: rows for several fields — word diff, JSON items, masked, uncha
     fire(unchanged, 'click');
     assert.equal(rows.querySelectorAll('[data-unchanged]').length, 0);
     assert.equal(t.slot('unchanged-count', item).hidden, true, 'recorded rows are opened, not counted');
+});
+
+test('timeline: an unchanged long value opened with "Show unchanged" is one closed fold; an empty one draws no table', async () => {
+    const t = mounted();
+    const text = leadingLines(4) + 'line 5';
+
+    t.timeline.show(SEARCH);
+    t.search.calls[0].resolve(resultPage({
+        events: [event({
+            detail: detail({
+                fieldCount: 2,
+                unchangedCount: 1,
+                fields: [
+                    field(),
+                    field({name: 'note', label: 'Note', kind: 'long', before: '', after: null, beforeLength: 0,
+                        afterLength: 0}),
+                    field({name: 'description', label: 'Description', kind: 'long', changed: false, before: text,
+                        after: text, beforeLength: 30, afterLength: 30})
+                ]
+            })
+        })],
+        total: {count: 1, atLeast: false}
+    }));
+    await flush();
+
+    const item = t.root.querySelector('[data-activity="1"]');
+    const rows = t.slot('rows', item);
+    const empty = t.slot('value', rows.children[1]);
+    assert.equal(empty.querySelector('table'), null, 'no lines on either side: no table');
+    assert.equal(empty.textContent, '0 → 0 chars · 0 edits', 'only the line under the value');
+
+    fire(t.slot('unchanged', item), 'click');
+    const unchanged = t.slot('value', rows.querySelector('[data-unchanged]'));
+    const table = unchanged.querySelector('table.split-diff');
+    assert.equal(table.querySelectorAll('tr.split-diff__row--change').length, 0);
+    assert.equal(table.querySelectorAll('tr.split-diff__row').some(isShown), false, 'every line is folded away');
+    const fold = table.querySelector('[data-action="fold"]');
+    assert.equal(fold.textContent, 'Show 5 unchanged lines');
+    fire(fold, 'click');
+    assert.deepEqual(table.querySelectorAll('tr.split-diff__row').filter(isShown)
+        .map((row) => row.children[1].textContent), ['line 1', 'line 2', 'line 3', 'line 4', 'line 5'],
+    'the fold opens to the numbered text');
+});
+
+test('timeline: a long value changed past its 600th word counts the edit the split diff shows', async () => {
+    const t = mounted();
+    const words = Array.from({length: 700}, (unused, index) => 'word' + index).join(' ');
+
+    t.timeline.show(SEARCH);
+    t.search.calls[0].resolve(resultPage({
+        events: [event({
+            detail: detail({
+                fieldCount: 1,
+                fields: [field({name: 'description', label: 'Description', kind: 'long', before: words + ' old',
+                    after: words + ' new', beforeLength: 6000, afterLength: 6000})]
+            })
+        })],
+        total: {count: 1, atLeast: false}
+    }));
+    await flush();
+
+    const value = t.slot('value', t.slot('rows', t.root.querySelector('[data-activity="1"]')).children[0]);
+    assert.equal(value.querySelectorAll('tr.split-diff__row--change').length, 1);
+    assert.match(value.textContent, /6,000 → 6,000 chars · 1 edit(?!s)/, 'one changed stretch: ' + value.textContent);
 });
 
 test('timeline: a field set automatically carries its tag, and a change made only of them reads as Magento\'s', async () => {

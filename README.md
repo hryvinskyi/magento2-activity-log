@@ -57,8 +57,9 @@ shows the partial result and asks you to narrow the search. Every other search s
 **Timeline.**
 - Activities are grouped by day, with one sentence for each change and a "via <channel> <client>" part when the actor
   worked through a client.
-- A change shows its values before and after. Long text shows a word diff, a JSON list shows what was added and
-  removed, and a masked value shows no content.
+- A change shows its values before and after. Long text shows a split diff (numbered lines side by side, the changed
+  words marked, long unchanged stretches folded behind a button that opens them), a JSON list shows what was added
+  and removed, and a masked value shows no content.
 - A field the system set by itself while carrying out what the actor asked (the module that recorded it says so) is
   tagged "set automatically" and is not counted in the sentence. A change made only of such fields reads "Magento
   updated …", with the actor named on the line below. The grid's change columns show the fields the actor asked for.
@@ -212,6 +213,63 @@ class InvoiceCondition implements SearchConditionInterface
 **Show the timeline on another page.** Add the layout handle `hryvinskyi_activitylog_timeline_assets` to the page, then
 `mount(root, options)` the RequireJS module `Hryvinskyi_ActivityLog/js/timeline/timeline`. The mount returns
 `show(search)`, `stop()` and `destroy()`. The options are described at the top of `view/adminhtml/web/js/timeline/timeline.js`.
+
+### Published browser modules
+Other modules may build on these RequireJS modules. They are pure (no DOM, no wording) unless said otherwise.
+
+- `Hryvinskyi_ActivityLog/js/search/diff` compares two values:
+  - `words(before, after)`: words, runs of whitespace and markup tags, over the first `MAX_TOKENS` (600) tokens of each
+    side. Returns `{parts, edits, capped, rest}`.
+  - `inline(before, after)`: a finer split for one line against another. A token is a run of letters (with their
+    combining marks), digits and underscores (any script), a run of whitespace, or any other single character, so
+    `31/1/2026` against `31/1/2027` changes only the year. Each removal or addition between unchanged text is placed as
+    early as it can go, except a run that can reach the end of the text, which stays at the end: uncommenting
+    `<!--  <li>` removes `<!--  `, not `!--  <`, and `<li>` against `<!-- <li> -->` adds ` -->` at the end. A run
+    moves at most `MAX_TOKENS` tokens to get there. Returns `{parts: [{op, text}], edits, capped}`.
+  - `lines(before, after)`: line by line. A line ends after `\r\n`, `\n` or `\r`, and is equal to another when its
+    text is, whichever line break ends it: a browser posts a text area's line breaks as `\r\n`, so a value saved
+    again through a form shows only the lines whose text changed. Whitespace inside a line is content. Returns
+    `{lines: [{op, text}], capped}`, the text without its line break; between two unchanged lines the removed lines
+    come first, then the added ones.
+  - `array(before, after)`: the items one JSON list gained and lost against another.
+
+  `inline()` and `lines()` set aside what both sides start and end with, then compare at most `MAX_TOKENS` tokens or
+  `MAX_LINES` (1000) lines a side of the middle. A longer middle comes back as all removed, then all added, with
+  `capped: true`.
+- `Hryvinskyi_ActivityLog/js/model/split-diff` lays two texts out side by side. `split(before, after)` returns
+  `{rows, changes, capped}`:
+  - a row `{type: 'line', before, after}` has a side `{number, op, parts: [{text, changed}]}` or `null` (nothing
+    beside a line the other side does not have). Between two unchanged lines the k-th removed line sits beside the k-th
+    added one;
+  - the parts of such a pair are marked `changed` where `inline()` finds them different, when the unchanged parts
+    hold at least 30 % of the longer line's non-whitespace characters. A pair that shares less, a line with no
+    partner, and every pair past the first `MAX_HIGHLIGHTED_PAIRS` (200) of a value are one unmarked part, to be
+    drawn as changed as a whole;
+  - every change keeps `CONTEXT` (3) unchanged rows visible on each side; a longer unchanged stretch becomes one
+    `{type: 'fold', rows}` when it hides at least two rows. Equal texts are one fold;
+  - `changes` counts the runs of changed rows, the number of edits the timeline and the grid give for a long value;
+    `capped` says a comparison was cut short.
+- `Hryvinskyi_ActivityLog/js/view/split-diff` draws that model as a table. It is a DOM adapter: it builds with the
+  document it is given, and every text goes in through `textContent`, so stored markup is shown, never built.
+  - `render(doc, model, wording, options)` returns a `<table class="split-diff">` of four columns: the line number
+    and the text before, the line number and the text after. `wording` is `{fold, filler}`: `fold` labels a fold, `%1`
+    standing for the number of rows it hides ("Show %1 unchanged lines"); `filler` is read out for a side with nothing
+    in it ("No line"). Either one missing or not a string throws a `TypeError`. `options.formatNumber` writes the
+    fold's count (`String` by default).
+  - A changed word is a `<del class="split-diff__word">` on the before side and an `<ins class="split-diff__word">` on
+    the after side, in a darker shade. A changed line with no marked word has its whole text in one
+    `<del class="split-diff__line">`/`<ins class="split-diff__line">`, so a change is never told by colour alone. A side
+    with nothing in it holds its `filler` name as visually hidden text.
+  - Rows that are not folded sit in plain `<tbody>`s. Each fold is a `<tbody class="split-diff__fold-group">` of its
+    own: first the fold's row with its `<button data-action="fold">`, then the rows it hides, each `hidden`.
+  - `expand(button)` opens the fold of a `[data-action="fold"]` button and returns `true`; for any other element, or
+    a fold already open, it returns `false`. The fold's rows are shown, the fold's own row is hidden but stays in the
+    table (a host that closes on a click outside itself still finds the click inside), and the focus moves to the
+    first row shown. The table listens to nothing: the host delegates its clicks to `expand()`.
+
+  A page that draws the table adds the layout handle `hryvinskyi_activitylog_split_diff_assets`, which brings the
+  stylesheet; the timeline's handle includes it. Long lines are shown in full and wrap. The table's cell rules are
+  at least 0,3,2 specific, so a host page's table rules up to that specificity leave its cells alone.
 
 ## Known limits
 - A denied activity is described as "tried to change" or "tried to delete" only when its channel's module says so;

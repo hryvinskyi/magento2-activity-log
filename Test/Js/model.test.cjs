@@ -92,20 +92,29 @@ test('change cell: the field is named, or several are counted', () => {
         {count: 0, label: null, code: null});
 });
 
-test('change cell: short values inline, long text by its word edits, JSON lists by items added and removed', () => {
+test('change cell: short values inline, long text by its changed stretches, JSON lists by items added and removed', () => {
     const cell = load('model/change-cell');
 
     assert.deepEqual(plain(cell.values({change_kind: 'short', change_before: '34.00', change_after: ''})), {
         kind: 'short', before: '34.00', after: null, edits: 0, added: 0, removed: 0, list: false
     });
     assert.equal(cell.values({change_kind: 'long', change_before: 'soft cotton shirt', change_after: 'soft linen shirt'})
-        .edits, 2);
+        .edits, 1, 'one changed line');
+    assert.equal(cell.values({change_kind: 'long', change_before: 'intro\nsoft cotton\nshirt\nsize M\nend',
+        change_after: 'intro\nsoft linen\nshirt\nsize L\nend'}).edits, 2, 'two stretches of changed lines');
     assert.deepEqual(plain(cell.values({change_kind: 'json', change_before: '["a","b"]', change_after: '["b","c","d"]'})),
         {kind: 'json', before: '["a","b"]', after: '["b","c","d"]', edits: 0, added: 2, removed: 1, list: true});
     assert.equal(cell.values({change_kind: 'json', change_before: '{"a":1}', change_after: '[]'}).list, false);
     assert.equal(cell.values({change_kind: 'masked', change_before: '••••••', change_after: '••••••'}).kind, 'masked');
     assert.equal(cell.values({change_kind: 'script'}).kind, null, 'an unknown kind shows no value');
     assert.equal(cell.values({}).kind, null);
+});
+
+test('change cell: a long value changed past its 600th word counts the edit the split diff shows', () => {
+    const cell = load('model/change-cell');
+    const words = Array.from({length: 700}, (unused, index) => 'word' + index).join(' ');
+
+    assert.equal(cell.values({change_kind: 'long', change_before: words + ' old', change_after: words + ' new'}).edits, 1);
 });
 
 test('criterion event: a search key and a trimmed value of the length the search takes', () => {
@@ -157,9 +166,9 @@ test('change cell: a row\'s values are worked out once while its cell draws, and
     const first = cell.values(row);
 
     assert.equal(cell.values(row), first, 'the same row gives the same values, without a second diff');
-    assert.equal(first.edits, 2);
-    row.change_after = 'hard linen shirt';
-    assert.equal(cell.values(row).edits, 4, 'a row whose values changed is worked out anew');
+    assert.equal(first.edits, 1);
+    row.change_after = 'soft linen shirt\nsoft cotton shirt\nand socks';
+    assert.equal(cell.values(row).edits, 2, 'a row whose values changed is worked out anew');
 });
 
 test('selection actions: "Select All" is withheld while the count is only a lower bound', () => {

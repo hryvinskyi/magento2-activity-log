@@ -20,15 +20,17 @@
  * - Fields recorded unchanged (a snapshot of the whole record) are kept apart, collapsed until asked for. When only
  *   their number was kept, the number is all the result has: there are no rows to open. When the result carries
  *   fewer rows than were recorded, it says so (partial), for the page to point at the details.
- * - Each row carries the view of its kind: inline values, a word diff of long text, the items a JSON list gained and
- *   lost (long text again when a side is not a list), or nothing at all for a masked secret.
+ * - Each row carries the view of its kind: inline values, a split diff of long text (whose changed stretches are the
+ *   row's edit count), the items a JSON list gained and lost (long text again when a side is not a list), or nothing
+ *   at all for a masked secret.
  * - A row is highlighted when a chip of a key that names fields matches it: the row's code contains the chip's value,
  *   or its label is the value, ignoring case.
  * Pure: takes a parsed result (request.js), returns data.
  */
 define([
-    'Hryvinskyi_ActivityLog/js/search/diff'
-], function (diff) {
+    'Hryvinskyi_ActivityLog/js/search/diff',
+    'Hryvinskyi_ActivityLog/js/model/split-diff'
+], function (diff, splitDiff) {
     'use strict';
 
     var CREATED = 'created',
@@ -46,11 +48,16 @@ define([
     }
 
     /**
+     * Long text: its split diff, whose changed stretches are the edits the row counts
+     *
      * @param {Object} field
-     * @returns {Object}
+     * @returns {{type: string, split: Object}}
      */
     function longView(field) {
-        return {type: 'long', diff: diff.words(field.before, field.after)};
+        return {
+            type: 'long',
+            split: splitDiff.split(field.before, field.after)
+        };
     }
 
     /**

@@ -7,23 +7,24 @@
 /**
  * One activity of the timeline drawn from its sentence model (search/sentence.js): the time with its milliseconds and
  * the channel's badge, the sentence "actor via [channel] client verb what on subject-type subject (scope): before →
- * after" (the channel a client acted through is a small badge: the registered channel's name and colours, or its
- * code in capitals on a neutral badge when no module registers it), a row per field (inline values, a word diff of long
- * text clipped to three lines, the items a JSON list gained and lost, a masked secret; a field the system set by
- * itself carries a small "set automatically" tag), the fields recorded unchanged (a control that opens their rows,
- * saying how many of them it shows when the result carries only some, or only their number when no rows were
- * recorded), the request's other
- * activities (saying so when the list stops before the last of them), the request's chip and the link to the
- * details. A change in which every changed field was set automatically reads "Magento updated …", and the actor whose
- * save it happened in moves to the line under the sentence. Renders with template clones, created elements and
- * textContent only; links come from the parsed results, which accept only http(s) addresses and site paths.
+ * after" (the channel a client acted through is a small badge: the registered channel's name and colours, or its code
+ * in capitals on a neutral badge when no module registers it), a row per field (inline values, a split diff of long
+ * text with its unchanged stretches folded, the items a JSON list gained and lost, a masked secret; a field the system
+ * set by itself carries a small "set automatically" tag), the fields recorded unchanged (a control that opens their
+ * rows, saying how many of them it shows when the result carries only some, or only their number when no rows were
+ * recorded), the request's other activities (saying so when the list stops before the last of them), the request's chip
+ * and the link to the details. A change in which every changed field was set automatically reads "Magento updated …",
+ * and the actor whose save it happened in moves to the line under the sentence. Renders with template clones, created
+ * elements and textContent only; links come from the parsed results, which accept only http(s) addresses and site
+ * paths.
  *
- * The item only draws. Its controls carry data-action names ("diff", "same", "unchanged", "siblings", "actor",
+ * The item only draws. Its controls carry data-action names ("fold", "same", "unchanged", "siblings", "actor",
  * "request") that the timeline answers; the expanding ones are answered here (toggle), the rest by the timeline.
  */
 define([
-    'Hryvinskyi_ActivityLog/js/search/wording'
-], function (wording) {
+    'Hryvinskyi_ActivityLog/js/search/wording',
+    'Hryvinskyi_ActivityLog/js/view/split-diff'
+], function (wording, splitDiffView) {
     'use strict';
 
     var SUCCESS = 'success',
@@ -215,32 +216,6 @@ define([
         }
 
         /**
-         * A long text's word diff, the parts the diff compared marked deleted or inserted; what lies beyond the
-         * compared words is shown as it was and as it is
-         *
-         * @param {HTMLElement} within
-         * @param {{parts: Array<{op: string, text: string}>, rest: {before: string, after: string}}} diff
-         * @returns {HTMLElement}
-         */
-        function wordDiff(within, diff) {
-            var block = element(within, 'div', 'activity-stream__long'),
-                classes = {equal: '', 'delete': 'activity-stream__del', insert: 'activity-stream__ins'};
-
-            block.setAttribute('data-part', 'long');
-            diff.parts.forEach(function (part) {
-                block.appendChild(element(within, 'span', classes[part.op], part.text));
-            });
-            if (diff.rest.before === diff.rest.after) {
-                block.appendChild(element(within, 'span', '', diff.rest.after));
-            } else {
-                block.appendChild(element(within, 'span', classes['delete'], diff.rest.before));
-                block.appendChild(element(within, 'span', classes.insert, diff.rest.after));
-            }
-
-            return block;
-        }
-
-        /**
          * How each kind of value is drawn into a row's value cell; every view the sentence model gives has one
          */
         VALUES = Object.freeze({
@@ -250,13 +225,15 @@ define([
             long: function (cell, row) {
                 var meta = element(cell, 'div', 'activity-stream__value-meta');
 
-                cell.appendChild(wordDiff(cell, row.view.diff));
-                meta.appendChild(toggleButton(cell, 'diff', words.showFullDiff));
+                if (row.view.split.rows.length > 0) {
+                    cell.appendChild(splitDiffView.render(cell.ownerDocument, row.view.split,
+                        {fold: words.foldLines, filler: words.noLine}, {formatNumber: context.formatNumber}));
+                }
                 meta.appendChild(element(cell, 'span', '', wording.fill(
-                    words.longMeta,
+                    row.view.split.changes === 1 ? words.longMetaOne : words.longMeta,
                     context.formatNumber(row.beforeLength),
                     context.formatNumber(row.afterLength),
-                    context.formatNumber(row.view.diff.edits)
+                    context.formatNumber(row.view.split.changes)
                 )));
                 if (row.truncated) {
                     meta.appendChild(element(cell, 'span', '', words.truncated));
@@ -535,12 +512,8 @@ define([
          * The expanding controls an item answers itself, by data-action
          */
         TOGGLES = Object.freeze({
-            diff: function (button) {
-                var block = button.closest('[data-slot="value"]').querySelector('[data-part="long"]'),
-                    open = button.getAttribute('aria-expanded') !== 'true';
-
-                block.classList.toggle('activity-stream__long--full', open);
-                mark(button, open, words.collapse, words.showFullDiff);
+            fold: function (button) {
+                splitDiffView.expand(button);
             },
             same: function (button) {
                 var open = button.getAttribute('aria-expanded') !== 'true';

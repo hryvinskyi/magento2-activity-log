@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<!--
+    The stylesheet of the split diff table that Hryvinskyi_ActivityLog/js/view/split-diff draws. Any page that draws
+    the table includes it with <update handle="hryvinskyi_activitylog_split_diff_assets"/>, and never names the
+    stylesheet itself, so the file can move or split without touching those pages.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Hryvinskyi_ActivityLog::css/split-diff.css"/>
+    </head>
+</page>

@@ -11,6 +11,13 @@
  * dataset, children, text, hidden, value, inline style and focus; selectors made of a tag, .class and [attribute]
  * or [attribute="value"] parts; events that bubble, with AbortSignal-bound listeners; <template> content. Nothing here
  * is a browser; a test proves what the adapter asks of the page, the walkthrough proves the page.
+ *
+ * Where it behaves as a browser does, for adapters that rely on it:
+ * - hasAttribute(name) answers as getAttribute does: data-* names through dataset, the rest through the attributes
+ *   set (tabindex and colspan among them);
+ * - removeAttribute(name) removes a data-* name from dataset as well;
+ * - classList.toggle(name) without force flips the class; with or without force it returns whether the class is now
+ *   on.
  */
 
 const SELECTOR = /^([a-z]*)((?:\.[a-z0-9_-]+)*)((?:\[[a-z-]+(?:="[^"]*")?\])*)$/i;
@@ -58,11 +65,14 @@ class FakeElement {
             remove: (name) => element.classList.toggle(name, false),
             contains: (name) => element.className.split(/\s+/).includes(name),
             toggle: (name, force) => {
+                const on = force === undefined ? !element.classList.contains(name) : Boolean(force);
                 const names = element.className.split(/\s+/).filter(Boolean).filter((n) => n !== name);
-                if (force) {
+                if (on) {
                     names.push(name);
                 }
                 element.className = names.join(' ');
+
+                return on;
             }
         };
         if (this.tagName === 'TEMPLATE') {
@@ -112,7 +122,14 @@ class FakeElement {
         return null;
     }
 
+    hasAttribute(name) {
+        return this.getAttribute(name) !== null;
+    }
+
     removeAttribute(name) {
+        if (name.startsWith('data-')) {
+            delete this.dataset[camel(name.slice(5))];
+        }
         delete this.attrs[name];
     }
 

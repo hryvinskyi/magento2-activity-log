@@ -512,8 +512,8 @@ define([
          * What each control of the timeline does, by its data-action
          */
         ACTIONS = Object.freeze({
-            diff: function (control) {
-                items.toggle('diff', control);
+            fold: function (control) {
+                items.toggle('fold', control);
             },
             same: function (control) {
                 items.toggle('same', control);

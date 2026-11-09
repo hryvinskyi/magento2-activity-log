@@ -19,7 +19,7 @@ define([
 
     var WORDING = Object.freeze(['via', 'on', 'empty', 'masked', 'maskedNote', 'automatic', 'automaticUpdated',
         'automaticDuring', 'severalScopes', 'createdWithOne', 'createdWith',
-        'fields', 'moreFields', 'openRecord', 'showFullDiff', 'collapse', 'longMeta', 'truncated', 'jsonMeta',
+        'fields', 'moreFields', 'openRecord', 'foldLines', 'noLine', 'longMeta', 'longMetaOne', 'truncated', 'jsonMeta',
         'showUnchanged', 'hideUnchanged', 'unchangedOne', 'unchangedMany', 'unchangedCountOne', 'unchangedCountMany',
         'unchangedPartial', 'siblings', 'siblingsCapped', 'correlationTitle',
         'openDetails', 'dayEventsOne', 'dayEventsMany', 'dayToday', 'dayYesterday', 'changeOne', 'changeMany',

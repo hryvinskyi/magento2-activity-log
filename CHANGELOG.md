@@ -5,6 +5,42 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-11-09
+
+### Added
+- `Hryvinskyi_ActivityLog/js/search/diff` compares one line against another with `inline()`, whose tokens are runs
+  of letters and digits, runs of whitespace and single other characters, so a changed year or a removed `<!--` is all
+  that is marked. A letter's combining marks belong to its word. Each removal or addition between unchanged text is
+  placed as early as it can go, except a run that can reach the end of the text, which stays at the end; a run moves
+  at most `MAX_TOKENS` tokens, so the work grows with the length of the text.
+- `Hryvinskyi_ActivityLog/js/search/diff` compares texts line by line with `lines()`. A line is compared on its text
+  alone, so a value saved again through a form, which posts its line breaks as `\r\n`, shows only the lines whose
+  text changed. At most `MAX_LINES` (1000) lines a side are aligned after the shared start and end are set aside; a
+  longer middle is returned as removed, then added.
+- `Hryvinskyi_ActivityLog/js/model/split-diff`: two texts side by side for a split diff. Removed lines are paired
+  with added ones, the changed words of a pair are marked when what they share holds at least 30 % of the longer
+  line's characters other than whitespace, and unchanged stretches are folded with three rows of context around every
+  change.
+- `Hryvinskyi_ActivityLog/js/view/split-diff` draws that model as a side-by-side split diff table: numbered lines on
+  each side, removed lines light red and added ones light green, changed words in a darker `<del>`/`<ins>`, and a
+  button per fold that opens it in place. `expand(button)` opens the fold a host's click landed on.
+- The layout handle `hryvinskyi_activitylog_split_diff_assets` adds the table's stylesheet, `css/split-diff.css`, to a
+  page that draws it. Its cell rules hold against a host page's table rules up to specificity 0,3,2.
+- The README lists the module's published browser modules.
+
+### Changed
+- The timeline draws a long value as a split diff in place of a word diff clipped to three lines: the whole value,
+  numbered line by line, with unchanged stretches folded. The "Show full diff" toggle is gone; the line under the value
+  still gives the lengths and the number of edits.
+- The edit count of a long value, in the timeline and in the grid, counts the changed stretches of lines its split
+  diff shows, in place of the word edits among the first 600 tokens, which missed a change near the end of a long
+  value.
+
+### Removed
+- The `showFullDiff` and `collapse` wording of `TimelineAssets::config()`, which only the clipped word diff used. The
+  wording gains `foldLines` (a fold's label), `noLine` (the name of an empty side) and `longMetaOne` (the line
+  under a long value with one edit).
+
 ## [1.3.1] - 2026-11-07
 
 ### Changed

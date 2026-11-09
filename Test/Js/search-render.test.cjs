@@ -85,6 +85,290 @@ test('diff: JSON lists gain and lose items; repeated items count; anything else 
     assert.deepEqual(plain(diff.array('42', '[]')), {ok: false, added: [], removed: [], same: []});
 });
 
+test('diff inline: a run of letters and digits is one token, so only the changed number changes', () => {
+    const diff = load('search/diff');
+    const result = diff.inline('Returret forlænget til d. 31/1/2026</span>', 'Returret forlænget til d. 31/1/2027</span>');
+
+    assert.deepEqual(plain(result), {
+        parts: [
+            {op: 'equal', text: 'Returret forlænget til d. 31/1/'},
+            {op: 'delete', text: '2026'},
+            {op: 'insert', text: '2027'},
+            {op: 'equal', text: '</span>'}
+        ],
+        edits: 2,
+        capped: false
+    });
+});
+
+test('diff inline: a letter outside ASCII stays inside its word', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('på', 'pa').parts), [
+        {op: 'delete', text: 'på'},
+        {op: 'insert', text: 'pa'}
+    ], 'no shared "p": the word is one token');
+    assert.deepEqual(plain(diff.inline('blå bil', 'blå hus').parts), [
+        {op: 'equal', text: 'blå '},
+        {op: 'delete', text: 'bil'},
+        {op: 'insert', text: 'hus'}
+    ]);
+});
+
+test('diff inline: a removed opening of a comment is the change, not the bracket it shares with the tag after it', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('<!--  <li class="x">', '<li class="x">')), {
+        parts: [
+            {op: 'delete', text: '<!--  '},
+            {op: 'equal', text: '<li class="x">'}
+        ],
+        edits: 1,
+        capped: false
+    });
+});
+
+test('diff inline: an added opening of a comment is the change, not the bracket it shares with the tag after it', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('<li class="x">', '<!--  <li class="x">').parts), [
+        {op: 'insert', text: '<!--  '},
+        {op: 'equal', text: '<li class="x">'}
+    ]);
+});
+
+test('diff inline: an added closing of a comment at the end is added as it was typed', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('<li class="x">', '<li class="x"> -->').parts), [
+        {op: 'equal', text: '<li class="x">'},
+        {op: 'insert', text: ' -->'}
+    ]);
+});
+
+test('diff inline: a tag wrapped in a comment shows the opening and the closing it gained, each where it was typed', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('<div class="x">', '<!-- <div class="x"> -->').parts), [
+        {op: 'insert', text: '<!-- '},
+        {op: 'equal', text: '<div class="x">'},
+        {op: 'insert', text: ' -->'}
+    ]);
+    assert.deepEqual(plain(diff.inline('<!-- <div class="x"> -->', '<div class="x">').parts), [
+        {op: 'delete', text: '<!-- '},
+        {op: 'equal', text: '<div class="x">'},
+        {op: 'delete', text: ' -->'}
+    ]);
+});
+
+test('diff inline: a removal between two unchanged runs moves as far towards the start as the text allows', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.inline('a, b, c', 'a, c').parts), [
+        {op: 'equal', text: 'a'},
+        {op: 'delete', text: ', b'},
+        {op: 'equal', text: ', c'}
+    ], 'the ", " both sides of "b" share goes with the text after the removal');
+});
+
+test('diff inline: a removal inside a long repeated stretch slides at most MAX_TOKENS tokens earlier, in linear time', () => {
+    const diff = load('search/diff');
+    const count = 200000;
+    const before = 'A' + '!'.repeat(count) + 'B';
+    const after = 'A' + '!'.repeat(count - 1) + 'B';
+
+    const started = process.hrtime.bigint();
+    const result = diff.inline(before, after);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    assert.ok(elapsedMs < 1000, 'the work is not quadratic in the unchanged text around the change: ' + elapsedMs + ' ms');
+    assert.deepEqual(plain(result), {
+        parts: [
+            {op: 'equal', text: 'A' + '!'.repeat(count - 1 - diff.MAX_TOKENS)},
+            {op: 'delete', text: '!'},
+            {op: 'equal', text: '!'.repeat(diff.MAX_TOKENS) + 'B'}
+        ],
+        edits: 1,
+        capped: false
+    }, 'the removal moves MAX_TOKENS tokens towards the start, not all the way to the "A"');
+});
+
+test('diff inline: a removal that can slide far towards the end comes back, in linear time', () => {
+    const diff = load('search/diff');
+    const count = 200000;
+    const before = 'A-%' + '!'.repeat(count) + 'B';
+    const after = 'A+%' + '!'.repeat(count - 1) + 'B';
+
+    const started = process.hrtime.bigint();
+    const result = diff.inline(before, after);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    assert.ok(elapsedMs < 1000, 'the work is not quadratic in the unchanged text around the change: ' + elapsedMs + ' ms');
+    assert.deepEqual(plain(result.parts), [
+        {op: 'equal', text: 'A'},
+        {op: 'delete', text: '-'},
+        {op: 'insert', text: '+'},
+        {op: 'equal', text: '%'},
+        {op: 'delete', text: '!'},
+        {op: 'equal', text: '!'.repeat(count - 1) + 'B'}
+    ], 'moved towards the end, then back towards the start, the removal stays right after the "%"');
+});
+
+test('diff inline: a combining mark stays inside its word', () => {
+    const diff = load('search/diff');
+    const acute = 'café';
+    const grave = 'cafè';
+
+    assert.deepEqual(plain(diff.inline(acute + ' au lait', acute + ' noir').parts), [
+        {op: 'equal', text: acute + ' '},
+        {op: 'delete', text: 'au lait'},
+        {op: 'insert', text: 'noir'}
+    ]);
+    assert.deepEqual(plain(diff.inline(acute, grave).parts), [
+        {op: 'delete', text: acute},
+        {op: 'insert', text: grave}
+    ], 'a letter written as a base letter and a mark is one token with its word, so the whole word changes');
+});
+
+test('diff inline: what both texts start and end with is set aside, and counted once', () => {
+    const diff = load('search/diff');
+    const words = (from, count) => Array.from({length: count}, (unused, index) => 'word' + (from + index)).join(' ');
+    const before = words(0, 400) + ' old ' + words(400, 400);
+    const after = words(0, 400) + ' new ' + words(400, 400);
+
+    assert.ok(before.length > 5000, 'longer than the comparison cap of ' + diff.MAX_TOKENS + ' tokens a side');
+    const result = diff.inline(before, after);
+
+    assert.equal(result.capped, false);
+    assert.deepEqual(plain(result.parts), [
+        {op: 'equal', text: words(0, 400) + ' '},
+        {op: 'delete', text: 'old'},
+        {op: 'insert', text: 'new'},
+        {op: 'equal', text: ' ' + words(400, 400)}
+    ]);
+
+    assert.deepEqual(plain(diff.inline('a a', 'a')), {
+        parts: [{op: 'equal', text: 'a'}, {op: 'delete', text: ' a'}],
+        edits: 1,
+        capped: false
+    }, 'the shared "a" is matched at the start only');
+    assert.deepEqual(plain(diff.inline(null, undefined)), {parts: [], edits: 0, capped: false});
+    assert.deepEqual(plain(diff.inline('', 'x y').parts), [{op: 'insert', text: 'x y'}]);
+});
+
+test('diff inline: a middle longer than the cap is all removed, then all added, and flagged', () => {
+    const diff = load('search/diff');
+    const words = (prefix, count) => Array.from({length: count}, (unused, index) => prefix + index).join(' ');
+    const before = '<p>' + words('a', 400) + '</p>';
+    const after = '<p>' + words('b', 400) + '</p>';
+
+    const started = process.hrtime.bigint();
+    const result = diff.inline(before, after);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    assert.equal(result.capped, true);
+    assert.deepEqual(plain(result.parts), [
+        {op: 'equal', text: '<p>'},
+        {op: 'delete', text: words('a', 400)},
+        {op: 'insert', text: words('b', 400)},
+        {op: 'equal', text: '</p>'}
+    ]);
+    assert.equal(result.edits, 2);
+    assert.ok(elapsedMs < 1000, 'the work is bounded: ' + elapsedMs + ' ms');
+});
+
+test('diff lines: a line is compared on its text alone, and returned without its line break', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.lines('a\r\nb', 'a\nb')), {
+        lines: [
+            {op: 'equal', text: 'a'},
+            {op: 'equal', text: 'b'}
+        ],
+        capped: false
+    }, 'a different line ending is the same line: a form posts its line breaks as "\\r\\n"');
+    assert.deepEqual(plain(diff.lines('one\ntwo\nthree', 'one\r\n2\r\nthree').lines), [
+        {op: 'equal', text: 'one'},
+        {op: 'delete', text: 'two'},
+        {op: 'insert', text: '2'},
+        {op: 'equal', text: 'three'}
+    ], 'a value saved again through a form shows the one line edited, not every line');
+    assert.deepEqual(plain(diff.lines('abc', 'abc ').lines), [
+        {op: 'delete', text: 'abc'},
+        {op: 'insert', text: 'abc '}
+    ], 'whitespace inside a line is content');
+    assert.deepEqual(plain(diff.lines('one\ntwo\rthree\r\n', 'one\ntwo\rthree\r\n').lines), [
+        {op: 'equal', text: 'one'},
+        {op: 'equal', text: 'two'},
+        {op: 'equal', text: 'three'},
+        {op: 'equal', text: ''}
+    ], 'a line ends after "\\n", "\\r" or "\\r\\n"; a text that ends with a line break has an empty last line');
+    assert.deepEqual(plain(diff.lines('a', 'a\n').lines), [
+        {op: 'equal', text: 'a'},
+        {op: 'insert', text: ''}
+    ], 'a line break added after the last line leaves that line and adds an empty one');
+    assert.deepEqual(plain(diff.lines('', null)), {lines: [], capped: false}, 'an empty text has no lines');
+    assert.deepEqual(plain(diff.lines(null, 'x').lines), [{op: 'insert', text: 'x'}]);
+});
+
+test('diff lines: what both texts start and end with is set aside, and counted once', () => {
+    const diff = load('search/diff');
+
+    assert.deepEqual(plain(diff.lines('x\nx', 'x').lines), [
+        {op: 'equal', text: 'x'},
+        {op: 'delete', text: 'x'}
+    ], 'the shared line is matched at the start only, whichever line break ends it');
+    assert.deepEqual(plain(diff.lines('x\nx\n', 'x\n').lines), [
+        {op: 'equal', text: 'x'},
+        {op: 'delete', text: 'x'},
+        {op: 'equal', text: ''}
+    ]);
+});
+
+test('diff lines: between two unchanged lines, the removed lines come first, then the added ones', () => {
+    const diff = load('search/diff');
+    const alphabet = ['a', 'b', 'c', 'd'];
+    const texts = [''];
+
+    for (let length = 1; length <= 4; length += 1) {
+        texts.slice().filter((text) => text.length === length - 1).forEach((text) => {
+            alphabet.forEach((letter) => texts.push(text + letter));
+        });
+    }
+    texts.forEach((before) => {
+        texts.forEach((after) => {
+            const result = diff.lines([...before].join('\n'), [...after].join('\n')).lines;
+            const ops = result.map((line) => line.op[0]).join('');
+
+            assert.doesNotMatch(ops, /i[di]*d/, before + ' → ' + after + ': ' + ops);
+            assert.equal(result.filter((line) => line.op !== 'insert').map((line) => line.text).join(''), before);
+            assert.equal(result.filter((line) => line.op !== 'delete').map((line) => line.text).join(''), after);
+        });
+    });
+});
+
+test('diff lines: a middle longer than 1000 lines a side is all removed, then all added, and still complete', () => {
+    const diff = load('search/diff');
+    const lines = (prefix, count) => Array.from({length: count}, (unused, index) => prefix + index).join('\n');
+    const before = 'head\n' + lines('a', 1001) + '\ntail';
+    const after = 'head\n' + lines('b', 1001) + '\ntail';
+
+    const started = process.hrtime.bigint();
+    const result = diff.lines(before, after);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    assert.equal(diff.MAX_LINES, 1000);
+    assert.equal(result.capped, true);
+    assert.equal(result.lines.length, 2 + 1001 + 1001);
+    assert.deepEqual(plain(result.lines[0]), {op: 'equal', text: 'head'});
+    assert.ok(result.lines.slice(1, 1002).every((line, index) => line.op === 'delete' && line.text === 'a' + index));
+    assert.ok(result.lines.slice(1002, 2003).every((line, index) => line.op === 'insert' && line.text === 'b' + index));
+    assert.deepEqual(plain(result.lines[2003]), {op: 'equal', text: 'tail'});
+    assert.ok(elapsedMs < 1000, 'the work is bounded: ' + elapsedMs + ' ms');
+
+    assert.equal(diff.lines(lines('a', 1000), lines('b', 1000)).capped, false, '1000 lines a side are compared');
+});
+
 /**
  * A result as request.parsePage returns it
  */
@@ -258,6 +542,20 @@ test('sentence: a record created names its field count and lists the values', ()
     assert.deepEqual(model.rows[0].before, {text: '', empty: true});
 });
 
+test('sentence: a long value changed past its 600th word counts the one stretch that changed', () => {
+    const sentence = load('search/sentence');
+    const words = Array.from({length: 700}, (unused, index) => 'word' + index).join(' ');
+    const model = plain(sentence.build(event({
+        detail: detail({
+            fieldCount: 1,
+            fields: [field({name: 'description', label: 'Description', kind: 'long', before: words + ' old',
+                after: words + ' new'})]
+        })
+    })));
+
+    assert.equal(model.rows[0].view.split.changes, 1);
+});
+
 test('sentence: long text, JSON lists and masked secrets each get their view', () => {
     const sentence = load('search/sentence');
     const model = plain(sentence.build(event({
@@ -272,8 +570,11 @@ test('sentence: long text, JSON lists and masked secrets each get their view', (
         })
     })));
 
+    assert.deepEqual(Object.keys(model.rows[0].view), ['type', 'split']);
     assert.equal(model.rows[0].view.type, 'long');
-    assert.equal(model.rows[0].view.diff.edits, 2);
+    assert.equal(model.rows[0].view.split.changes, 1, 'the split diff the row draws, and counts: one changed line');
+    assert.deepEqual(model.rows[0].view.split.rows[0].after.parts,
+        [{text: 'a ', changed: false}, {text: 'x', changed: true}, {text: ' c', changed: false}]);
     assert.deepEqual(model.rows[1].view, {type: 'json', added: ['c'], removed: ['a'], same: ['b']});
     assert.equal(model.rows[2].view.type, 'long', 'a JSON field whose side is no list falls back to long text');
     assert.deepEqual(model.rows[3].view, {type: 'masked'});

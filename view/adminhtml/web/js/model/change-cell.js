@@ -10,12 +10,14 @@
  *
  * The field cell names the one changed field (with its code when that differs), or counts several and lists them.
  * The value cell shows the first changed field: short values inline, masked values only marked, long text as the
- * number of word edits, a JSON list as the items added and removed. A row's values are worked out once: the cell asks
- * for them several times while it draws, and a long text's diff is the costly part. Pure: the column holds the words.
+ * number of changed stretches its split diff shows, a JSON list as the items added and removed. A row's values are
+ * worked out once: the cell asks for them several times while it draws, and a long text's diff is the costly part.
+ * Pure: the column holds the words.
  */
 define([
-    'Hryvinskyi_ActivityLog/js/search/diff'
-], function (diff) {
+    'Hryvinskyi_ActivityLog/js/search/diff',
+    'Hryvinskyi_ActivityLog/js/model/split-diff'
+], function (diff, splitDiff) {
     'use strict';
 
     var KINDS = ['short', 'long', 'json', 'masked'],
@@ -46,8 +48,8 @@ define([
     /**
      * @param {Object} row
      * @returns {{kind: ?string, before: ?string, after: ?string, edits: number, added: number, removed: number,
-     *     list: boolean}} kind null when the row records no value; edits for long text; added, removed and list
-     *     (whether both sides are JSON lists) for JSON
+     *     list: boolean}} kind null when the row records no value; edits for long text, the stretches of changed lines
+     *     its split diff shows; added, removed and list (whether both sides are JSON lists) for JSON
      */
     function values(row) {
         var known = worked.get(row);
@@ -74,7 +76,7 @@ define([
             lists;
 
         if (kind === 'long') {
-            cell.edits = diff.words(before, after).edits;
+            cell.edits = splitDiff.split(before, after).changes;
         }
         if (kind === 'json') {
             lists = diff.array(before, after);
